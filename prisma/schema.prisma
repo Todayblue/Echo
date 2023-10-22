@@ -1,21 +1,11 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch"]
 }
 
-enum Role {
-  ADMIN
-  USER
-}
-
-enum VoteType {
-  UP
-  DOWN
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Account {
@@ -24,31 +14,23 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
 model Profile {
   id     Int    @id @default(autoincrement())
   bio    String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -64,30 +46,27 @@ model User {
   name                String?
   email               String?        @unique
   emailVerified       DateTime?
+  username            String?        @unique
+  role                Role           @default(USER)
+  image               String?
+  accounts            Account[]
+  Comment             Comment[]
+  CommentVote         CommentVote[]
+  Post                Post[]
+  Profile             Profile?
   createdSubCommunity SubCommunity[] @relation("CreatedBy")
   subscriptions       Subscription[]
   votes               Vote[]
-
-  username    String?       @unique
-  role        Role          @default(USER)
-  image       String?
-  accounts    Account[]
-  sessions    Session[]
-  Post        Post[]
-  Comment     Comment[]
-  CommentVote CommentVote[]
-  Profile     Profile?
 }
 
 model SubCommunity {
-  id        String    @id @default(cuid())
-  slug      String?
-  name      String    @unique
-  createdAt DateTime? @default(now())
-  updatedAt DateTime? @updatedAt
-  posts     Post[]
-
+  id          String         @id @default(cuid())
+  slug        String?
+  name        String         @unique
+  createdAt   DateTime?      @default(now())
+  updatedAt   DateTime?      @updatedAt
   creatorId   String?
+  posts       Post[]
   Creator     User?          @relation("CreatedBy", fields: [creatorId], references: [id])
   subscribers Subscription[]
 
@@ -96,10 +75,10 @@ model SubCommunity {
 
 model Subscription {
   name           String?      @unique
-  user           User         @relation(fields: [userId], references: [id])
   userId         String
-  subCommunity   SubCommunity @relation(fields: [subCommunityId], references: [id])
   subCommunityId String
+  subCommunity   SubCommunity @relation(fields: [subCommunityId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
 
   @@id([userId, subCommunityId])
 }
@@ -111,47 +90,55 @@ model Post {
   content        String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  author         User         @relation(fields: [authorId], references: [id])
   authorId       String
-  subCommunity   SubCommunity @relation(fields: [subCommunityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   subCommunityId String
   comments       Comment[]
+  author         User         @relation(fields: [authorId], references: [id])
+  subCommunity   SubCommunity @relation(fields: [subCommunityId], references: [id], onDelete: Cascade)
   votes          Vote[]
 }
 
 model Comment {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   text      String
-  createdAt DateTime @default(now())
-  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime      @default(now())
   authorId  String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
-
   replyToId String?
-  replyTo   Comment?  @relation("ReplyTo", fields: [replyToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  replies   Comment[] @relation("ReplyTo")
-
-  votes     CommentVote[]
   commentId String?
+  author    User          @relation(fields: [authorId], references: [id])
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  replyTo   Comment?      @relation("ReplyTo", fields: [replyToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Comment[]     @relation("ReplyTo")
+  votes     CommentVote[]
 }
 
 model Vote {
-  user   User     @relation(fields: [userId], references: [id])
   userId String
-  post   Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId String
   type   VoteType
+  post   Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user   User     @relation(fields: [userId], references: [id])
 
   @@id([userId, postId])
 }
 
 model CommentVote {
-  user      User     @relation(fields: [userId], references: [id])
   userId    String
-  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
   commentId String
   type      VoteType
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
 
   @@id([userId, commentId])
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum VoteType {
+  UP
+  DOWN
 }
