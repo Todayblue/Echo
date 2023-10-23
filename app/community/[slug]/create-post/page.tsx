@@ -1,7 +1,12 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+
 import { useForm } from "react-hook-form";
 
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
+// components
 import { CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -10,20 +15,31 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-
 import Editor from "@/components/editor/Editor";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import Select from "react-tailwindcss-select";
+
+// hooks
+import { useCustomToasts } from "@/hooks/use-custom-toasts";
+import { toast } from "@/hooks/use-toast";
+
+// validator and types
+import { zodResolver } from "@hookform/resolvers/zod";
 import { PostCreationRequest, PostValidator } from "@/lib/validators/post";
 import { ICommunity } from "@/types/db";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import Select from "react-tailwindcss-select";
 import { Option } from "react-tailwindcss-select/dist/components/type";
+
+// api
+import { useMutation, useQuery } from "@tanstack/react-query";
+import axios, { AxiosError } from "axios";
+
+const createSubCommuPost = async (payload: PostCreationRequest) => {
+  const { data } = await axios.post("/api/subcommunity/post/create", payload);
+
+  return data;
+};
 
 const getCommunityBySlug = async (slug: string) => {
   const { data } = await axios.get(`/api/subcommunity/${slug}`);
@@ -46,9 +62,56 @@ const Page = ({ params }: { params: { slug: string } }) => {
   const router = useRouter();
   const { slug } = params;
   const { data: session } = useSession();
+  const { loginToast } = useCustomToasts();
 
   const form = useForm<PostCreationRequest>({
     resolver: zodResolver(PostValidator),
+  });
+
+  const { mutate: createPost } = useMutation({
+    mutationFn: async (values: PostCreationRequest) =>
+      createSubCommuPost(values),
+    onError: (err) => {
+      if (err instanceof AxiosError) {
+        if (err.response?.status === 403) {
+          return toast({
+            title: "You are not subscribed to this community",
+            description: "Please subscribe to sub community.",
+            variant: "destructive",
+          });
+        }
+
+        if (err.response?.status === 422) {
+          return toast({
+            title: "Invalid subreddit name.",
+            description: "Please choose a name between 3 and 21 letters.",
+            variant: "destructive",
+          });
+        }
+
+        if (err.response?.status === 401) {
+          return loginToast();
+        }
+      }
+
+      toast({
+        title: "There was an error.",
+        description: "Could not create sub community.",
+        variant: "destructive",
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Create post",
+        description: "Created post successfully",
+        variant: "default",
+        duration: 2000,
+      });
+      setTimeout(() => {
+        router.back();
+        return;
+      }, 1000);
+    },
   });
 
   const { data: community, isLoading } = useQuery({
@@ -109,7 +172,8 @@ const Page = ({ params }: { params: { slug: string } }) => {
   };
 
   const onSubmit = (data: PostCreationRequest) => {
-    console.log("Form submitted with data:", data);
+    // console.log("Form submitted with data:", data);
+    createPost(data);
   };
 
   return (
