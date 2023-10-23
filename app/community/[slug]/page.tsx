@@ -24,7 +24,7 @@ const testCardData: Card[] = [
     img: "https://images.unsplash.com/photo-1628260412297-a3377e45006f?auto=format&fit=crop&q=80&w=1974&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   {
-    author: "TT",
+    author: "Monocerius",
     title: "Can coffee make you a better developer?",
     img: "https://images.unsplash.com/photo-1697615787046-9ea01c331f29?auto=format&fit=crop&q=80&w=1895&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
