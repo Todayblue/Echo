@@ -1,7 +1,8 @@
 "use client";
-import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
 
+import { CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -9,20 +10,20 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
+import Editor from "@/components/editor/Editor";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import Select from "react-tailwindcss-select";
-import Editor from "@/components/editor/Editor";
 import { PostCreationRequest, PostValidator } from "@/lib/validators/post";
+import { ICommunity } from "@/types/db";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import ReactSelect from "@/components/ReactSelect";
-import { Option, Options } from "react-tailwindcss-select/dist/components/type";
-import { ICommunity } from "@/types/db";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Select from "react-tailwindcss-select";
+import { Option } from "react-tailwindcss-select/dist/components/type";
 
 const getCommunityBySlug = async (slug: string) => {
   const { data } = await axios.get(`/api/subcommunity/${slug}`);
@@ -42,7 +43,10 @@ type CommunitiesQuery = {
 };
 
 const Page = ({ params }: { params: { slug: string } }) => {
+  const router = useRouter();
   const { slug } = params;
+  const { data: session } = useSession();
+
   const form = useForm<PostCreationRequest>({
     resolver: zodResolver(PostValidator),
   });
@@ -68,11 +72,19 @@ const Page = ({ params }: { params: { slug: string } }) => {
     return null;
   };
 
-  const communityDefaults = getCommunityDefaults(community);
+  const [topic, setTopic] = useState<Option | null>(null);
+  // console.log("topic:", topic);
 
-  console.log("communityDefaults", communityDefaults);
+  useEffect(() => {
+    session && form.setValue("authorId", session.user.id);
 
-  const [topic, setTopic] = useState(communityDefaults);
+    const communityDefaults = getCommunityDefaults(community);
+    // console.log("communityDefaults", communityDefaults);
+
+    setTopic(communityDefaults);
+    communityDefaults &&
+      form.setValue("subCommunityId", communityDefaults.value);
+  }, [community, form, session]);
 
   const { data: communities } = useQuery<CommunitiesQuery[]>({
     queryKey: ["communities"],
@@ -155,7 +167,9 @@ const Page = ({ params }: { params: { slug: string } }) => {
               </div>
             </div>
             <CardFooter className="justify-between space-x-2 py-10">
-              <Button variant="ghost">Cancel</Button>
+              <Button variant="ghost" onClick={() => router.back()}>
+                Cancel
+              </Button>
               <Button type="submit">Create Post</Button>
             </CardFooter>
           </div>
