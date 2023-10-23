@@ -1,6 +1,8 @@
 import prisma from "@/lib/prisma";
 import { PostValidator } from "@/lib/validators/post";
 import { z } from "zod";
+import slugify from "slugify";
+import cuid from "cuid";
 
 export async function POST(req: Request) {
   try {
@@ -22,19 +24,27 @@ export async function POST(req: Request) {
     });
 
     if (!subscription) {
-      return new Response("Subscribe to post", { status: 403 });
+      return new Response(
+        "You are not subscribed to this community. Please subscribe to post.",
+        { status: 403 }
+      );
     }
+
+    const id = cuid();
+    const slug = `${slugify(title, { lower: true })}-${id}`;
 
     const post = await prisma.post.create({
       data: {
+        id,
         title,
         content,
         authorId: authorId,
         subCommunityId,
+        slug,
       },
     });
 
-    return Response.json(post)
+    return Response.json(post);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(error.message, { status: 400 });
