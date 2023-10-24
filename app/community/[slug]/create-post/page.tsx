@@ -108,8 +108,8 @@ const Page = ({ params }: { params: { slug: string } }) => {
         duration: 2000,
       });
       setTimeout(() => {
-        router.back();
-        return;
+        router.push(`/community/${slug}`);
+        router.refresh();
       }, 1000);
     },
   });

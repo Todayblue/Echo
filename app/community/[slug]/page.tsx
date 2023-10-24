@@ -7,31 +7,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CommuAvatar from "@/components/community/CommuAvatar";
 import SubscribeLeaveToggle from "@/components/SubscribeLeaveToggle";
-import CommuCard from "@/components/community/CommuCard";
+import CommuCard from "@/components/community/PostCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 
-type Card = {
-  author: string;
-  title: string;
-  img?: string;
-};
-
-const testCardData: Card[] = [
-  {
-    author: "Panda",
-    title: "Can coffee make you a better developer?",
-    img: "https://images.unsplash.com/photo-1628260412297-a3377e45006f?auto=format&fit=crop&q=80&w=1974&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-  {
-    author: "Monocerius",
-    title: "Can coffee make you a better developer?",
-    img: "https://images.unsplash.com/photo-1697615787046-9ea01c331f29?auto=format&fit=crop&q=80&w=1895&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  },
-];
-
 const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
   const session = await getAuthSession();
+
   const subcommunity = await prisma.subCommunity.findFirst({
     where: { slug: slug },
     include: {
@@ -40,6 +22,7 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
           author: true,
           votes: true,
         },
+        orderBy: { createdAt: "desc" },
       },
     },
   });
@@ -69,13 +52,15 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
     },
   });
 
+  // console.log("sub community:", subcommunity);
+
   return (
     <>
       {/* bg */}
       <div className="min-w-full pt-4">
         <div className="bg-sky-500 h-20"></div>
       </div>
-      <div className="relative w-full  h-24 py-3 bg-white border border-b-gray-200">
+      <div className="relative w-full h-24 py-3 bg-white border border-b-gray-200">
         <div className="mx-32">
           <div className="absolute -top-2 ">
             <CommuAvatar />
@@ -107,8 +92,8 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
       </div>
 
       {/* content */}
-      <div className="grid h-full place-items-center bg-gray-300">
-        <div className="grid w-4/5 grid-cols-1 gap-x-6   md:grid-cols-3 py-6">
+      <div className="grid  min-h-fit place-items-center bg-gray-200">
+        <div className="grid w-full md:w-4/5 grid-cols-1 gap-x-6  md:grid-cols-3 py-6">
           {/* <ToFeedButton /> */}
 
           {/* <div className="flex flex-col col-span-2 ">{children}</div> */}
@@ -121,20 +106,34 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
               <Input placeholder="Create Post..." />
             </div>
 
-            {testCardData.map((item, index) => {
+            {subcommunity.posts.map((post) => {
+              const votesAmt = post.votes.reduce((acc, vote) => {
+                if (vote.type === "UP") return acc + 1;
+                if (vote.type === "DOWN") return acc - 1;
+                return acc;
+              }, 0);
+
+              const currentVote = post.votes.find(
+                (vote) => vote.userId === session?.user.id
+              );
               return (
                 <CommuCard
-                  key={index}
-                  author={item.author}
-                  title={item.title}
-                  image={item.img}
+                  key={post.id}
+                  id={post.id}
+                  commu={slug}
+                  author={post.author.name}
+                  title={post.title}
+                  content={post.content}
+                  createdAt={post.createdAt}
+                  votesAmt={votesAmt}
+                  currentVote={currentVote}
                 />
               );
             })}
           </div>
 
           {/* info sidebar */}
-          <div className="overflow-hidden  bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
+          <div className="overflow-hidden w-screen md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
             <div className="mx-6 pt-4 ">
               <p className="font-semibold py-3 border-b border-gray-300 ">
                 About Community
