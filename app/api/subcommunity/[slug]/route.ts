@@ -6,6 +6,7 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
+    // console.log("params", params.slug);
 
     const community = await prisma.subCommunity.findFirst({
       where: {
@@ -21,8 +22,8 @@ export async function GET(
         subscribers: {
           include: {
             user: true,
-          }
-        }
+          },
+        },
       },
     });
 
