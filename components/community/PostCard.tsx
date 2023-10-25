@@ -1,18 +1,18 @@
 "use client";
 
 import { formatTimeToNow } from "@/lib/utils";
+import { Vote } from "@prisma/client";
 import { Dot } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PostVoteClient from "./vote/PostVoteClient";
-import { Vote } from "@prisma/client";
 
 type PartialVote = Pick<Vote, "type">;
 
 type PostCardProps = {
   id: string;
-  commu: string;
+  commu?: string;
   author: string | null;
   title: string;
   image?: string;
@@ -41,6 +41,8 @@ const PostCard = ({
   const pRef = useRef<HTMLParagraphElement>(null);
   const [isLongContent, setIsLongContent] = useState(false);
 
+  // console.log(createdAt as Date);
+
   useEffect(() => {
     pRef.current?.clientHeight === 160 && setIsLongContent(true);
   }, []);
@@ -61,7 +63,7 @@ const PostCard = ({
             <Dot size={20} className="text-gray-500" />
             <div className="text-sm text-gray-400 flex items-center gap-x-2">
               <h3 className="">Posted by : {author}</h3>
-              <p>{formatTimeToNow(createdAt)}</p>
+              <p>{formatTimeToNow(new Date(createdAt))}</p>
             </div>
           </div>
           <div className="text-gray-900 font-bold text-xl">{title}</div>
