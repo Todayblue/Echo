@@ -23,7 +23,6 @@ const Page = () => {
         creatorId: session?.user.id,
         name: input,
       };
-      console.log("payload", payload);
       const { data } = await axios.post("/api/subcommunity", payload);
       console.log("data", data);
       return data as string;

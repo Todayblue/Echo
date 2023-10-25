@@ -1,31 +1,50 @@
-import React from "react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import PostsFeed from "@/components/PostsFeed";
+import SubscribeLeaveToggle from "@/components/SubscribeLeaveToggle";
+import CommuAvatar from "@/components/community/CommuAvatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { LIMIT_POST } from "@/constant";
 import { getAuthSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { format } from "date-fns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import CommuAvatar from "@/components/community/CommuAvatar";
-import SubscribeLeaveToggle from "@/components/SubscribeLeaveToggle";
-import CommuCard from "@/components/community/PostCard";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 
-const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
-  const session = await getAuthSession();
+type SubCommunityOption = {
+  page?: number;
+  limit?: number;
+};
 
-  const subcommunity = await prisma.subCommunity.findFirst({
-    where: { slug: slug },
+const getSubCommunity = async (
+  slug: string,
+  option: SubCommunityOption = {}
+) => {
+  const { page = 1, limit = LIMIT_POST } = option;
+
+  const subCommunity = await prisma.subCommunity.findFirst({
+    where: { slug },
     include: {
       posts: {
         include: {
           author: true,
           votes: true,
+          comments: true,
+          subCommunity: true,
         },
         orderBy: { createdAt: "desc" },
+        take: limit,
       },
     },
   });
+
+  return subCommunity;
+};
+
+const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
+  const session = await getAuthSession();
+
+  const subcommunity = await getSubCommunity(slug);
 
   const subscription = !session?.user
     ? undefined
@@ -52,7 +71,7 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
     },
   });
 
-  // console.log("sub community:", subcommunity);
+  // console.log("sub community:", subcommunity.posts);
 
   return (
     <>
@@ -106,30 +125,7 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
               <Input placeholder="Create Post..." />
             </div>
 
-            {subcommunity.posts.map((post) => {
-              const votesAmt = post.votes.reduce((acc, vote) => {
-                if (vote.type === "UP") return acc + 1;
-                if (vote.type === "DOWN") return acc - 1;
-                return acc;
-              }, 0);
-
-              const currentVote = post.votes.find(
-                (vote) => vote.userId === session?.user.id
-              );
-              return (
-                <CommuCard
-                  key={post.id}
-                  id={post.id}
-                  commu={slug}
-                  author={post.author.name}
-                  title={post.title}
-                  content={post.content}
-                  createdAt={post.createdAt}
-                  votesAmt={votesAmt}
-                  currentVote={currentVote}
-                />
-              );
-            })}
+            <PostsFeed initPosts={subcommunity.posts} subCommunityName={slug} />
           </div>
 
           {/* info sidebar */}

@@ -10,7 +10,7 @@ const ReactSelect = async ({ slug }: Props) => {
   const subcommunity = await prisma.subCommunity.findFirst({
     where: { slug: slug },
   });
-  console.log("subcommunity", subcommunity);
+  // console.log("subcommunity", subcommunity);
 
   return (
     <div></div>
