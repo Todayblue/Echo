@@ -42,9 +42,12 @@ export async function POST(req: Request) {
         subCommunityId,
         slug,
       },
+      include: {
+        subCommunity: true,
+      },
     });
 
-    return Response.json(post);
+    return Response.json({ post, subCommunityName: post.subCommunity.name });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(error.message, { status: 400 });
