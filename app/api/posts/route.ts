@@ -1,77 +1,81 @@
 import { getAuthSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { Session } from "next-auth";
 import { z } from "zod";
 
-export async function GET(req: Request) {
+const validateParams = async (req: Request) => {
   const url = new URL(req.url);
 
-  const session = await getAuthSession();
-
-  let followedCommunitiesIds: string[] = [];
-
-  if (session) {
-    const followedCommunities = await prisma.subscription.findMany({
-      where: {
-        userId: session.user.id,
-      },
-      include: {
-        subCommunity: true,
-      },
+  const params = await z
+    .object({
+      limit: z.string(),
+      page: z.string(),
+      subcommunity: z.string().nullish().optional(),
+    })
+    .parse({
+      subcommunity: url.searchParams.get("subcommunity"),
+      limit: url.searchParams.get("limit"),
+      page: url.searchParams.get("page"),
     });
 
-    followedCommunitiesIds = followedCommunities.map(
-      (sub) => sub.subCommunityId
-    );
-  }
+  return params;
+};
 
-  try {
-    const { limit, page, subcommunity } = z
-      .object({
-        limit: z.string(),
-        page: z.string(),
-        subcommunity: z.string().nullish().optional(),
+const getPostsWhereClause = async (
+  session: Session | null,
+  subcommunity: string | null | undefined
+) => {
+  let whereClause = {};
+
+  if (subcommunity) {
+    whereClause = {
+      subCommunity: {
+        name: subcommunity,
+      },
+    };
+  } else if (session) {
+    const followedCommunitiesIds = await prisma.subscription
+      .findMany({
+        where: {
+          userId: session.user.id,
+        },
+        include: {
+          subCommunity: true,
+        },
       })
-      .parse({
-        subcommunity: url.searchParams.get("subcommunity"),
-        limit: url.searchParams.get("limit"),
-        page: url.searchParams.get("page"),
-      });
+      .then((sub) => sub.map((sub) => sub.subCommunityId));
 
-    let whereClause = {};
-
-    if (subcommunity) {
-      whereClause = {
-        subCommunity: {
-          name: subcommunity,
+    whereClause = {
+      subCommunity: {
+        id: {
+          in: followedCommunitiesIds,
         },
-      };
-    } else if (session) {
-      whereClause = {
-        subCommunity: {
-          id: {
-            in: followedCommunitiesIds,
-          },
-        },
-      };
-    }
-
-    const posts = await prisma.post.findMany({
-      take: parseInt(limit),
-      skip: (parseInt(page) - 1) * parseInt(limit), // skip should start from 0 for page 1
-      orderBy: {
-        createdAt: "desc",
       },
-      include: {
-        subCommunity: true,
-        votes: true,
-        author: true,
-        comments: true,
-      },
-      where: whereClause,
-    });
-
-    return new Response(JSON.stringify(posts));
-  } catch (error) {
-    return new Response("Could not fetch posts", { status: 500 });
+    };
   }
+
+  return whereClause;
+};
+
+export async function GET(req: Request) {
+  const params = await validateParams(req);
+  const session = await getAuthSession();
+  const whereClause = await getPostsWhereClause(session, params.subcommunity);
+
+  const posts = await prisma.post.findMany({
+    take: parseInt(params.limit),
+    skip: (parseInt(params.page) - 1) * parseInt(params.limit), // skip should start from 0 for page 1
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      subCommunity: true,
+      votes: true,
+      author: true,
+      comments: true,
+    },
+    where: whereClause,
+  });
+
+  return new Response(JSON.stringify(posts));
 }
