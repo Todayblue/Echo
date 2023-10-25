@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useForm } from "react-hook-form";
 
@@ -100,7 +100,7 @@ const Page = ({ params }: { params: { slug: string } }) => {
         variant: "destructive",
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Create post",
         description: "Created post successfully",
@@ -108,7 +108,7 @@ const Page = ({ params }: { params: { slug: string } }) => {
         duration: 2000,
       });
       setTimeout(() => {
-        router.push(`/community/${slug}`);
+        router.push(`/community/${data.subCommunityName}`);
         router.refresh();
       }, 1000);
     },
@@ -118,11 +118,6 @@ const Page = ({ params }: { params: { slug: string } }) => {
     queryKey: ["community", slug],
     queryFn: () => getCommunityBySlug(slug),
   });
-
-  // const getCommunityDefaults = (community: ICommunity): Option => ({
-  //   value: community.id,
-  //   label: community.name,
-  // });
 
   const getCommunityDefaults = (community: ICommunity) => {
     if (community) {
@@ -139,15 +134,16 @@ const Page = ({ params }: { params: { slug: string } }) => {
   // console.log("topic:", topic);
 
   useEffect(() => {
-    session && form.setValue("authorId", session.user.id);
-
+    session?.user && form.setValue("authorId", session.user.id);
     const communityDefaults = getCommunityDefaults(community);
     // console.log("communityDefaults", communityDefaults);
 
-    setTopic(communityDefaults);
-    communityDefaults &&
+    if (communityDefaults) {
+      setTopic(communityDefaults);
       form.setValue("subCommunityId", communityDefaults.value);
-  }, [community, form, session]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [community, form]);
 
   const { data: communities } = useQuery<CommunitiesQuery[]>({
     queryKey: ["communities"],
