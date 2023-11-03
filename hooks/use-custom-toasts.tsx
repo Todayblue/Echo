@@ -1,6 +1,7 @@
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 
 export const useCustomToasts = () => {
   const loginToast = () => {
@@ -9,13 +10,13 @@ export const useCustomToasts = () => {
       description: "You need to be logged in to do that.",
       variant: "destructive",
       action: (
-        <Link
-          onClick={() => dismiss()}
-          href="/sign-in"
-          className={buttonVariants({ variant: "ghost" })}
+        <Button
+          className={`text-gray-700 ${buttonVariants({ variant: "ghost" })}`}
+          variant="outline"
+          onClick={() => signIn("google")}
         >
-          Login
-        </Link>
+          Sign in
+        </Button>
       ),
     });
   };

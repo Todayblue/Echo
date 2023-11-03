@@ -68,7 +68,7 @@ const Page = ({ params }: { params: { slug: string } }) => {
     resolver: zodResolver(PostValidator),
   });
 
-  const { mutate: createPost } = useMutation({
+  const { mutate: createPost, isPending } = useMutation({
     mutationFn: async (values: PostCreationRequest) =>
       createSubCommuPost(values),
     onError: (err) => {
@@ -108,7 +108,7 @@ const Page = ({ params }: { params: { slug: string } }) => {
         duration: 2000,
       });
       setTimeout(() => {
-        router.push(`/community/${data.subCommunityName}`);
+        router.push(`/community/${slug}`);
         router.refresh();
       }, 1000);
     },
@@ -134,13 +134,14 @@ const Page = ({ params }: { params: { slug: string } }) => {
   // console.log("topic:", topic);
 
   useEffect(() => {
-    session?.user && form.setValue("authorId", session.user.id);
     const communityDefaults = getCommunityDefaults(community);
     // console.log("communityDefaults", communityDefaults);
 
     if (communityDefaults) {
       setTopic(communityDefaults);
       form.setValue("subCommunityId", communityDefaults.value);
+    } else {
+      setTopic(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [community, form]);
@@ -168,28 +169,42 @@ const Page = ({ params }: { params: { slug: string } }) => {
   };
 
   const onSubmit = (data: PostCreationRequest) => {
-    // console.log("Form submitted with data:", data);
+    console.log("Form submitted with data:", data);
     createPost(data);
   };
 
   return (
     <div className=" bg-white rounded-lg">
-      <CardHeader className="font-semibold border-b border-gray-300">
+      <CardHeader className="font-semibold mx-4 border-b border-gray-300">
         <CardTitle>Create Post</CardTitle>
       </CardHeader>
-      <Select
-        primaryColor={"blue"}
-        value={topic}
-        onChange={handleSelectChange}
-        options={options}
-      />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
           <div className="mx-auto px-4 ">
             <div className="grid gap-6 pt-5">
               <div className="grid gap-2">
-                <Label htmlFor="security-level">Community</Label>
+                <Label>Community</Label>
+                <FormField
+                  control={form.control}
+                  name="subCommunityId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          {...field}
+                          isClearable
+                          isSearchable
+                          primaryColor={"blue"}
+                          value={topic}
+                          onChange={handleSelectChange}
+                          options={options}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
               <div className="grid gap-2">
                 <Label>Title</Label>
@@ -206,6 +221,7 @@ const Page = ({ params }: { params: { slug: string } }) => {
                   )}
                 />
               </div>
+
               <div className="grid gap-2">
                 <Label>Text </Label>
                 <FormField
@@ -230,7 +246,9 @@ const Page = ({ params }: { params: { slug: string } }) => {
               <Button variant="ghost" onClick={() => router.back()}>
                 Cancel
               </Button>
-              <Button type="submit">Create Post</Button>
+              <Button type="submit" isLoading={isPending}>
+                Create Post
+              </Button>
             </CardFooter>
           </div>
         </form>

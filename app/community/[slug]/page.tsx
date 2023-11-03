@@ -4,12 +4,18 @@ import CommuAvatar from "@/components/community/CommuAvatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LIMIT_POST } from "@/constant";
+import { LIMIT_POST } from "@/lib/constants";
 import { getAuthSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { format } from "date-fns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 type SubCommunityOption = {
   page?: number;
@@ -25,6 +31,7 @@ const getSubCommunity = async (
   const subCommunity = await prisma.subCommunity.findFirst({
     where: { slug },
     include: {
+      rule: true,
       posts: {
         include: {
           author: true,
@@ -45,6 +52,12 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
   const session = await getAuthSession();
 
   const subcommunity = await getSubCommunity(slug);
+
+  const rule = await prisma.rule.findFirst({
+    where: {
+      subCommunityId: subcommunity?.id,
+    },
+  });
 
   const subscription = !session?.user
     ? undefined
@@ -70,8 +83,6 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
       },
     },
   });
-
-  // console.log("sub community:", subcommunity.posts);
 
   return (
     <>
@@ -111,12 +122,12 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
       </div>
 
       {/* content */}
-      <div className="grid  min-h-fit place-items-center bg-gray-200">
-        <div className="grid w-full md:w-4/5 grid-cols-1 gap-x-6  md:grid-cols-3 py-6">
+      <div className="grid  min-h-screen  bg-gray-200">
+        <div className="grid  mx-auto w-4/5 grid-cols-6 gap-x-6   py-6">
           {/* <ToFeedButton /> */}
 
           {/* <div className="flex flex-col col-span-2 ">{children}</div> */}
-          <div className="flex flex-col col-span-2 space-y-4">
+          <div className="col-span-4 space-y-4">
             <div className="flex flex-row space-x-3 p-2 w-full border border-gray-300 rounded-md bg-white">
               <Avatar className="flex flex-none">
                 <AvatarImage src={session?.user.image} />
@@ -124,44 +135,76 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
               </Avatar>
               <Input placeholder="Create Post..." />
             </div>
-
             <PostsFeed initPosts={subcommunity.posts} subCommunityName={slug} />
           </div>
 
           {/* info sidebar */}
-          <div className="overflow-hidden w-screen md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
-            <div className="mx-6 pt-4 ">
-              <p className="font-semibold py-3 border-b border-gray-300 ">
-                About Community
-              </p>
-            </div>
-
-            <dl className="divide-y divide-gray-100 px-6 py-4 text-sm leading-6 bg-white">
-              <div className="flex justify-between gap-x-4 py-3">
-                <dt className="text-gray-500">Created</dt>
-                <dd className="text-gray-700">
-                  <time dateTime={subcommunity?.createdAt?.toDateString()}>
-                    {subcommunity?.createdAt
-                      ? format(subcommunity.createdAt, "MMMM d, yyyy")
-                      : "N/A"}
-                  </time>
-                </dd>
+          <div className="col-span-2  space-y-4">
+            <div className="w-screen md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
+              <div className="mx-6 pt-4 ">
+                <p className="font-semibold py-3 border-b border-gray-300 ">
+                  About Community
+                </p>
               </div>
-              <div className="flex justify-between gap-x-4 py-3">
-                <dt className="text-gray-500">Members</dt>
-                <dd className="flex items-start gap-x-2">
-                  <div className="text-gray-900">{memberCount}</div>
-                </dd>
-              </div>
-              {subcommunity.creatorId === session?.user?.id ? (
+              <dl className="divide-y divide-gray-100 px-6 py-4 text-sm leading-4 ">
                 <div className="flex justify-between gap-x-4 py-3">
-                  <dt className="text-gray-500">You created this community</dt>
+                  <dt className="text-gray-500">Created</dt>
+                  <dd className="text-gray-700">
+                    <time dateTime={subcommunity?.createdAt?.toDateString()}>
+                      {subcommunity?.createdAt
+                        ? format(subcommunity.createdAt, "MMMM d, yyyy")
+                        : "N/A"}
+                    </time>
+                  </dd>
                 </div>
-              ) : null}
-              <Link href={`/community/${slug}/create-post`}>
-                <Button className="w-full">Create Post</Button>
-              </Link>
-            </dl>
+                <div className="flex justify-between gap-x-4 py-3">
+                  <dt className="text-gray-500">Members</dt>
+                  <dd className="flex items-start gap-x-2">
+                    <div className="text-gray-900">{memberCount}</div>
+                  </dd>
+                </div>
+                {subcommunity.creatorId === session?.user?.id ? (
+                  <div className="flex justify-between gap-x-4 py-3">
+                    <dt className="text-gray-500">
+                      You created this community
+                    </dt>
+                  </div>
+                ) : null}
+                <Link href={`/community/${slug}/create-post`}>
+                  <Button className="w-full">Create Post</Button>
+                </Link>
+              </dl>
+            </div>
+            <div className="w-screen  md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
+              <div className="mx-6 pt-4 ">
+                <p className="capitalize font-semibold py-3 border-b border-gray-300 ">
+                  {subcommunity.name}/ Rules
+                </p>
+              </div>
+              <dl className="divide-y divide-gray-100 px-6 py-4 text-sm leading-4 ">
+                {subcommunity.rule.length === 0 ? (
+                  <Accordion type="single" collapsible>
+                    <AccordionItem value="item-1">
+                      <AccordionTrigger>No rules !!</AccordionTrigger>
+                    </AccordionItem>
+                  </Accordion>
+                ) : (
+                  <Accordion type="single" collapsible>
+                    {subcommunity.rule.map((rule) => (
+                      <AccordionItem value={rule.id} key={rule.id}>
+                        <AccordionTrigger>{rule.title}</AccordionTrigger>
+                        <AccordionContent>{rule.description}</AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                )}
+                {subcommunity.creatorId === session?.user?.id && (
+                  <Link href={`/community/${slug}/create-rule`}>
+                    <Button className="w-full">Create Rules</Button>
+                  </Link>
+                )}
+              </dl>
+            </div>
           </div>
         </div>
       </div>

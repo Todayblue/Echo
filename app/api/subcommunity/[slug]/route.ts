@@ -17,6 +17,7 @@ export async function GET(
             votes: true,
           },
         },
+        rule: true,
         subscribers: {
           include: {
             user: true,

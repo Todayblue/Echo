@@ -3,13 +3,21 @@ import { PostValidator } from "@/lib/validators/post";
 import { z } from "zod";
 import slugify from "slugify";
 import cuid from "cuid";
+import { getAuthSession } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
+    const session = await getAuthSession();
+
+    const authorId = session?.user.id;
+
     const body = await req.json();
 
-    const { title, content, subCommunityId, authorId } =
-      PostValidator.parse(body);
+    const { title, content, subCommunityId } = PostValidator.parse(body);
+
+    if (!session?.user) {
+      return new Response("Unauthorized", { status: 401 });
+    }
 
     if (!authorId) {
       return new Response("Unauthorized", { status: 401 });

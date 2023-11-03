@@ -33,8 +33,6 @@ export default async function Layout({
     },
   });
 
-  const rules = false;
-
   if (!subcommunity) return notFound();
 
   const memberCount = await prisma.subscription.count({
@@ -110,11 +108,6 @@ export default async function Layout({
                       </AccordionItem>
                     ))}
                   </Accordion>
-                )}
-                {subcommunity.creatorId === session?.user?.id && (
-                  <Link href={`/community/${slug}/create-rule`}>
-                    <Button className="w-full">Create Rules</Button>
-                  </Link>
                 )}
               </dl>
             </div>
