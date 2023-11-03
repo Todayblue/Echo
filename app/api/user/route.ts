@@ -4,16 +4,13 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-
     const users = await prisma.user.findMany({
-
     });
 
     return NextResponse.json(users);
   } catch (error) {
-
     return NextResponse.json(
-      { message: "Could not create subsidairy", error },
+      { message: "Could not get User", error },
       { status: 500 }
     );
   }

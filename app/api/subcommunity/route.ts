@@ -11,10 +11,10 @@ export async function GET() {
       include: {
         subscribers: {
           include: {
-            user: true
-          }
-        }
-      }
+            user: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(subCommunity);
@@ -27,15 +27,17 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const session = await getAuthSession();
+
+  if (!session?.user) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   try {
     const body = await req.json();
-    const { name, creatorId } = SubCommunityValidator.parse(body);
+    const { name } = SubCommunityValidator.parse(body);
 
     const slug = generateSlug(name);
-
-    if (!creatorId) {
-      return new Response("Unauthorized", { status: 401 });
-    }
 
     // check if subreddit already exists
     const subCommunityExists = await prisma.subCommunity.findFirst({
@@ -53,14 +55,14 @@ export async function POST(req: Request) {
       data: {
         name,
         slug: slug,
-        creatorId: creatorId,
+        creatorId: session.user.id,
       },
     });
 
     // creator also has to be subscribed
     await prisma.subscription.create({
       data: {
-        userId: creatorId,
+        userId: session.user.id,
         subCommunityId: subCommunity.id,
       },
     });

@@ -1,6 +1,6 @@
 "use client";
 
-import { LIMIT_POST } from "@/constant";
+import { LIMIT_POST } from "@/lib/constants";
 import { useIntersection } from "@mantine/hooks";
 import { Comment, Post, SubCommunity, User, Vote } from "@prisma/client";
 import { useInfiniteQuery } from "@tanstack/react-query";

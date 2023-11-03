@@ -49,6 +49,7 @@ model User {
   createdSubCommunity SubCommunity[] @relation("CreatedBy")
   subscriptions       Subscription[]
   votes               Vote[]
+  rule                Rule[]
 }
 
 model SubCommunity {
@@ -59,8 +60,9 @@ model SubCommunity {
   updatedAt   DateTime?      @updatedAt
   creatorId   String?
   posts       Post[]
-  Creator     User?          @relation("CreatedBy", fields: [creatorId], references: [id])
+  creator     User?          @relation("CreatedBy", fields: [creatorId], references: [id])
   subscribers Subscription[]
+  rule        Rule[]
 
   @@index([name])
 }
@@ -88,6 +90,16 @@ model Post {
   author         User         @relation(fields: [authorId], references: [id])
   subCommunity   SubCommunity @relation(fields: [subCommunityId], references: [id], onDelete: Cascade)
   votes          Vote[]
+}
+
+model Rule {
+  id             String       @id @default(cuid())
+  title          String
+  description    String
+  authorId       String
+  subCommunityId String
+  author         User         @relation(fields: [authorId], references: [id])
+  subCommunity   SubCommunity @relation(fields: [subCommunityId], references: [id], onDelete: Cascade)
 }
 
 model Comment {

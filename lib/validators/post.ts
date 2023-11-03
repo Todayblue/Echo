@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const PostValidator = z.object({
+  subCommunityId: z.string({ required_error: "Community is required" }),
   title: z
     .string({ required_error: "Title is required" })
     .min(3, {
@@ -9,9 +10,7 @@ export const PostValidator = z.object({
     .max(128, {
       message: "Title must be less than 128 characters long",
     }),
-  subCommunityId: z.string({ required_error: "Community is required" }),
   content: z.any(),
-  authorId: z.string({ required_error: "Author is required" }),
 });
 
 export type PostCreationRequest = z.infer<typeof PostValidator>;

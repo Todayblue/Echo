@@ -20,7 +20,6 @@ const Page = () => {
   const { mutate: createCommunity, isPending } = useMutation({
     mutationFn: async () => {
       const payload: CreateSubCommunityPayload = {
-        creatorId: session?.user.id,
         name: input,
       };
       const { data } = await axios.post("/api/subcommunity", payload);
@@ -29,6 +28,10 @@ const Page = () => {
     },
     onError: (err) => {
       if (err instanceof AxiosError) {
+        if (err.response?.status === 401) {
+          return loginToast();
+        }
+
         if (err.response?.status === 409) {
           return toast({
             title: "Subreddit already exists.",
@@ -44,10 +47,6 @@ const Page = () => {
             variant: "destructive",
           });
         }
-
-        if (err.response?.status === 401) {
-          return loginToast();
-        }
       }
 
       toast({
@@ -60,6 +59,10 @@ const Page = () => {
       router.push(`/community/${generateSlug(data)}`);
     },
   });
+
+  // if (!session) {
+  //   return loginToast();
+  // }
 
   return (
     <div className="container flex items-center h-full max-w-3xl mx-auto py-12">
