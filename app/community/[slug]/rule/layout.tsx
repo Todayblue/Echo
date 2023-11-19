@@ -1,9 +1,4 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import RuleList from "@/components/community/rule/RuleList";
 import { Button } from "@/components/ui/button";
 import { getAuthSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
@@ -20,7 +15,7 @@ export default async function Layout({
 }) {
   const session = await getAuthSession();
 
-  const subcommunity = await prisma.subCommunity.findFirst({
+  const community = await prisma.community.findFirst({
     where: { slug: slug },
     include: {
       rule: true,
@@ -33,11 +28,20 @@ export default async function Layout({
     },
   });
 
-  if (!subcommunity) return notFound();
+  if (!community) return notFound();
+
+  const rules = await prisma.rule.findMany({
+    where: {
+      communityId: community.id,
+    },
+    orderBy: {
+      id: "asc",
+    },
+  });
 
   const memberCount = await prisma.subscription.count({
     where: {
-      subCommunity: {
+      community: {
         slug: slug,
       },
     },
@@ -61,9 +65,9 @@ export default async function Layout({
                 <div className="flex justify-between gap-x-4 py-3">
                   <dt className="text-gray-500">Created</dt>
                   <dd className="text-gray-700">
-                    <time dateTime={subcommunity?.createdAt?.toDateString()}>
-                      {subcommunity?.createdAt
-                        ? format(subcommunity.createdAt, "MMMM d, yyyy")
+                    <time dateTime={community?.createdAt?.toDateString()}>
+                      {community?.createdAt
+                        ? format(community.createdAt, "MMMM d, yyyy")
                         : "N/A"}
                     </time>
                   </dd>
@@ -74,7 +78,7 @@ export default async function Layout({
                     <div className="text-gray-900">{memberCount}</div>
                   </dd>
                 </div>
-                {subcommunity.creatorId === session?.user?.id ? (
+                {community.creatorId === session?.user?.id ? (
                   <div className="flex justify-between gap-x-4 py-3">
                     <dt className="text-gray-500">
                       You created this community
@@ -86,31 +90,13 @@ export default async function Layout({
                 </Link>
               </dl>
             </div>
-            <div className="w-screen  md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
-              <div className="mx-6 pt-4 ">
-                <p className="capitalize font-semibold py-3 border-b border-gray-300 ">
-                  {subcommunity.name}/ Rules
-                </p>
-              </div>
-              <dl className="divide-y divide-gray-100 px-6 py-4 text-sm leading-4 ">
-                {subcommunity.rule.length === 0 ? (
-                  <Accordion type="single" collapsible>
-                    <AccordionItem value="item-1">
-                      <AccordionTrigger>No rules !!</AccordionTrigger>
-                    </AccordionItem>
-                  </Accordion>
-                ) : (
-                  <Accordion type="single" collapsible>
-                    {subcommunity.rule.map((rule) => (
-                      <AccordionItem value={rule.id} key={rule.id}>
-                        <AccordionTrigger>{rule.title}</AccordionTrigger>
-                        <AccordionContent>{rule.description}</AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                )}
-              </dl>
-            </div>
+            <RuleList
+              session={session}
+              communityCreatorId={community.creatorId}
+              communitySlug={community.slug}
+              communityName={community.name}
+              rules={rules}
+            />
           </div>
         </div>
       </div>

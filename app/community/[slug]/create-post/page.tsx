@@ -1,177 +1,23 @@
-"use client";
-import { useCallback, useEffect, useState } from "react";
+import { CardHeader, CardTitle } from "@/components/ui/card";
+import CreateCommunityPost from "@/components/community/post/CreateCommunityPost";
+import prisma from "@/lib/prisma";
 
-import { useForm } from "react-hook-form";
-
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-
-// components
-import { CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-import Editor from "@/components/editor/Editor";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import Select from "react-tailwindcss-select";
-
-// hooks
-import { useCustomToasts } from "@/hooks/use-custom-toasts";
-import { toast } from "@/hooks/use-toast";
-
-// validator and types
-import { zodResolver } from "@hookform/resolvers/zod";
-import { PostCreationRequest, PostValidator } from "@/lib/validators/post";
-import { ICommunity } from "@/types/db";
-import { Option } from "react-tailwindcss-select/dist/components/type";
-
-// api
-import { useMutation, useQuery } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
-
-const createSubCommuPost = async (payload: PostCreationRequest) => {
-  const { data } = await axios.post("/api/subcommunity/post/create", payload);
-
-  return data;
-};
-
-const getCommunityBySlug = async (slug: string) => {
-  const { data } = await axios.get(`/api/subcommunity/${slug}`);
-  return data.community;
-};
-
-const getCommunities = async () => {
-  const { data } = await axios.get("/api/subcommunity/");
-
-  return data;
-};
-
-type CommunitiesQuery = {
-  id: string;
-  name: string;
-  slug: string;
-};
-
-const Page = ({ params }: { params: { slug: string } }) => {
-  const router = useRouter();
-  const { slug } = params;
-  const { data: session } = useSession();
-  const { loginToast } = useCustomToasts();
-
-  const form = useForm<PostCreationRequest>({
-    resolver: zodResolver(PostValidator),
-  });
-
-  const { mutate: createPost, isPending } = useMutation({
-    mutationFn: async (values: PostCreationRequest) =>
-      createSubCommuPost(values),
-    onError: (err) => {
-      if (err instanceof AxiosError) {
-        if (err.response?.status === 403) {
-          return toast({
-            title: "You are not subscribed to this community",
-            description: "Please subscribe to sub community.",
-            variant: "destructive",
-          });
-        }
-
-        if (err.response?.status === 422) {
-          return toast({
-            title: "Invalid subreddit name.",
-            description: "Please choose a name between 3 and 21 letters.",
-            variant: "destructive",
-          });
-        }
-
-        if (err.response?.status === 401) {
-          return loginToast();
-        }
-      }
-
-      toast({
-        title: "There was an error.",
-        description: "Could not create sub community.",
-        variant: "destructive",
-      });
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Create post",
-        description: "Created post successfully",
-        variant: "default",
-        duration: 2000,
-      });
-      setTimeout(() => {
-        router.push(`/community/${slug}`);
-        router.refresh();
-      }, 1000);
+const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
+  const community = await prisma.community.findFirst({
+    where: {
+      slug: slug,
     },
   });
 
-  const { data: community, isLoading } = useQuery({
-    queryKey: ["community", slug],
-    queryFn: () => getCommunityBySlug(slug),
+  const communities = await prisma.community.findMany({
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+    },
   });
 
-  const getCommunityDefaults = (community: ICommunity) => {
-    if (community) {
-      const CommuOption = {
-        value: community.id,
-        label: community.name,
-      };
-      return CommuOption;
-    }
-    return null;
-  };
-
-  const [topic, setTopic] = useState<Option | null>(null);
-  // console.log("topic:", topic);
-
-  useEffect(() => {
-    const communityDefaults = getCommunityDefaults(community);
-    // console.log("communityDefaults", communityDefaults);
-
-    if (communityDefaults) {
-      setTopic(communityDefaults);
-      form.setValue("subCommunityId", communityDefaults.value);
-    } else {
-      setTopic(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [community, form]);
-
-  const { data: communities } = useQuery<CommunitiesQuery[]>({
-    queryKey: ["communities"],
-    queryFn: getCommunities,
-  });
-
-  if (!communities) {
-    return null;
-  }
-
-  const options: Option[] = communities.map((community: CommunitiesQuery) => ({
-    value: community.id.toString(),
-    label: community.name,
-  }));
-
-  const handleSelectChange = (selectOptions: any) => {
-    setTopic(selectOptions);
-
-    if (selectOptions) {
-      form.setValue("subCommunityId", selectOptions.value);
-    }
-  };
-
-  const onSubmit = (data: PostCreationRequest) => {
-    console.log("Form submitted with data:", data);
-    createPost(data);
-  };
+  if (!community || !communities) return <div>loading state</div>;
 
   return (
     <div className=" bg-white rounded-lg">
@@ -179,80 +25,7 @@ const Page = ({ params }: { params: { slug: string } }) => {
         <CardTitle>Create Post</CardTitle>
       </CardHeader>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
-          <div className="mx-auto px-4 ">
-            <div className="grid gap-6 pt-5">
-              <div className="grid gap-2">
-                <Label>Community</Label>
-                <FormField
-                  control={form.control}
-                  name="subCommunityId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          isClearable
-                          isSearchable
-                          primaryColor={"blue"}
-                          value={topic}
-                          onChange={handleSelectChange}
-                          options={options}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label>Title</Label>
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input placeholder="Add a Title..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Text </Label>
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Editor
-                          {...field}
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-            <CardFooter className="justify-between space-x-2 py-10">
-              <Button variant="ghost" onClick={() => router.back()}>
-                Cancel
-              </Button>
-              <Button type="submit" isLoading={isPending}>
-                Create Post
-              </Button>
-            </CardFooter>
-          </div>
-        </form>
-      </Form>
+      <CreateCommunityPost communities={communities} community={community} />
     </div>
   );
 };

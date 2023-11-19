@@ -10,10 +10,10 @@ const validateParams = async (req: Request) => {
     .object({
       limit: z.string(),
       page: z.string(),
-      subcommunity: z.string().nullish().optional(),
+      community: z.string().nullish().optional(),
     })
     .parse({
-      subcommunity: url.searchParams.get("subcommunity"),
+      community: url.searchParams.get("community"),
       limit: url.searchParams.get("limit"),
       page: url.searchParams.get("page"),
     });
@@ -23,14 +23,14 @@ const validateParams = async (req: Request) => {
 
 const getPostsWhereClause = async (
   session: Session | null,
-  subcommunity: string | null | undefined
+  community: string | null | undefined
 ) => {
   let whereClause = {};
 
-  if (subcommunity) {
+  if (community) {
     whereClause = {
-      subCommunity: {
-        name: subcommunity,
+      community: {
+        name: community,
       },
     };
   } else if (session) {
@@ -40,13 +40,13 @@ const getPostsWhereClause = async (
           userId: session.user.id,
         },
         include: {
-          subCommunity: true,
+          community: true
         },
       })
-      .then((sub) => sub.map((sub) => sub.subCommunityId));
+      .then((sub) => sub.map((sub) => sub.communityId));
 
     whereClause = {
-      subCommunity: {
+      community: {
         id: {
           in: followedCommunitiesIds,
         },
@@ -60,7 +60,7 @@ const getPostsWhereClause = async (
 export async function GET(req: Request) {
   const params = await validateParams(req);
   const session = await getAuthSession();
-  const whereClause = await getPostsWhereClause(session, params.subcommunity);
+  const whereClause = await getPostsWhereClause(session, params.community);
 
   const posts = await prisma.post.findMany({
     take: parseInt(params.limit),
@@ -69,7 +69,7 @@ export async function GET(req: Request) {
       createdAt: "desc",
     },
     include: {
-      subCommunity: true,
+      community: true,
       votes: true,
       author: true,
       comments: true,

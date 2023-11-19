@@ -15,7 +15,7 @@ export async function GET(
       include: {
         Post: true,
         subscriptions: true,
-        createdSubCommunity: true,
+        createdCommunity: true,
         votes: true,
       },
     });

@@ -1,5 +1,16 @@
 import PostsFeed from "@/components/PostsFeed";
 import SubscribeLeaveToggle from "@/components/SubscribeLeaveToggle";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import CommuAvatar from "@/components/community/CommuAvatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -10,25 +21,25 @@ import prisma from "@/lib/prisma";
 import { format } from "date-fns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Pencil, Trash } from "lucide-react";
+import RuleList from "@/components/community/rule/RuleList";
 
-type SubCommunityOption = {
+type communityOption = {
   page?: number;
   limit?: number;
 };
 
-const getSubCommunity = async (
-  slug: string,
-  option: SubCommunityOption = {}
-) => {
+const getcommunity = async (slug: string, option: communityOption = {}) => {
   const { page = 1, limit = LIMIT_POST } = option;
 
-  const subCommunity = await prisma.subCommunity.findFirst({
+  const community = await prisma.community.findFirst({
     where: { slug },
     include: {
       rule: true,
@@ -37,7 +48,7 @@ const getSubCommunity = async (
           author: true,
           votes: true,
           comments: true,
-          subCommunity: true,
+          community: true,
         },
         orderBy: { createdAt: "desc" },
         take: limit,
@@ -45,40 +56,42 @@ const getSubCommunity = async (
     },
   });
 
-  return subCommunity;
+  return community;
 };
 
 const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
   const session = await getAuthSession();
-
-  const subcommunity = await getSubCommunity(slug);
-
-  const rule = await prisma.rule.findFirst({
-    where: {
-      subCommunityId: subcommunity?.id,
-    },
-  });
+  const community = await getcommunity(slug);
 
   const subscription = !session?.user
     ? undefined
     : await prisma.subscription.findFirst({
         where: {
-          subCommunity: {
+          community: {
             slug: slug,
           },
           user: {
-            id: session.user.id,
+            id: session.user?.id,
           },
         },
       });
 
   const isSubscribed = !!subscription;
 
-  if (!subcommunity) return notFound();
+  if (!community) return notFound();
+
+  const rules = await prisma.rule.findMany({
+    where: {
+      communityId: community.id,
+    },
+    orderBy: {
+      id: "asc",
+    },
+  });
 
   const memberCount = await prisma.subscription.count({
     where: {
-      subCommunity: {
+      community: {
         slug: slug,
       },
     },
@@ -108,11 +121,11 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
               </div>
               <div className="px-4">
                 {/* <Button className="bg-blue-500 rounded-2xl px-10 hover:bg-blue-300"> */}
-                {subcommunity.creatorId !== session?.user?.id ? (
+                {community.creatorId !== session?.user?.id ? (
                   <SubscribeLeaveToggle
                     isSubscribed={isSubscribed}
-                    subCommunityId={subcommunity.id}
-                    subcommunityName={subcommunity.name}
+                    communityId={community.id}
+                    communityName={community.name}
                   />
                 ) : null}
               </div>
@@ -126,16 +139,17 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
         <div className="grid  mx-auto w-4/5 grid-cols-6 gap-x-6   py-6">
           {/* <ToFeedButton /> */}
 
-          {/* <div className="flex flex-col col-span-2 ">{children}</div> */}
           <div className="col-span-4 space-y-4">
             <div className="flex flex-row space-x-3 p-2 w-full border border-gray-300 rounded-md bg-white">
               <Avatar className="flex flex-none">
                 <AvatarImage src={session?.user.image} />
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
-              <Input placeholder="Create Post..." />
+              <Link className="w-full" href={`/community/${slug}/create-post`}>
+                <Input placeholder="Create Post..." />
+              </Link>
             </div>
-            <PostsFeed initPosts={subcommunity.posts} subCommunityName={slug} />
+            <PostsFeed initPosts={community.posts} communityName={slug} />
           </div>
 
           {/* info sidebar */}
@@ -150,9 +164,9 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
                 <div className="flex justify-between gap-x-4 py-3">
                   <dt className="text-gray-500">Created</dt>
                   <dd className="text-gray-700">
-                    <time dateTime={subcommunity?.createdAt?.toDateString()}>
-                      {subcommunity?.createdAt
-                        ? format(subcommunity.createdAt, "MMMM d, yyyy")
+                    <time dateTime={community?.createdAt?.toDateString()}>
+                      {community?.createdAt
+                        ? format(community.createdAt, "MMMM d, yyyy")
                         : "N/A"}
                     </time>
                   </dd>
@@ -163,7 +177,7 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
                     <div className="text-gray-900">{memberCount}</div>
                   </dd>
                 </div>
-                {subcommunity.creatorId === session?.user?.id ? (
+                {community.creatorId === session?.user?.id ? (
                   <div className="flex justify-between gap-x-4 py-3">
                     <dt className="text-gray-500">
                       You created this community
@@ -175,36 +189,13 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
                 </Link>
               </dl>
             </div>
-            <div className="w-screen  md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
-              <div className="mx-6 pt-4 ">
-                <p className="capitalize font-semibold py-3 border-b border-gray-300 ">
-                  {subcommunity.name}/ Rules
-                </p>
-              </div>
-              <dl className="divide-y divide-gray-100 px-6 py-4 text-sm leading-4 ">
-                {subcommunity.rule.length === 0 ? (
-                  <Accordion type="single" collapsible>
-                    <AccordionItem value="item-1">
-                      <AccordionTrigger>No rules !!</AccordionTrigger>
-                    </AccordionItem>
-                  </Accordion>
-                ) : (
-                  <Accordion type="single" collapsible>
-                    {subcommunity.rule.map((rule) => (
-                      <AccordionItem value={rule.id} key={rule.id}>
-                        <AccordionTrigger>{rule.title}</AccordionTrigger>
-                        <AccordionContent>{rule.description}</AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                )}
-                {subcommunity.creatorId === session?.user?.id && (
-                  <Link href={`/community/${slug}/create-rule`}>
-                    <Button className="w-full">Create Rules</Button>
-                  </Link>
-                )}
-              </dl>
-            </div>
+            <RuleList
+              session={session}
+              communityCreatorId={community.creatorId}
+              communitySlug={community.slug}
+              communityName={community.name}
+              rules={rules}
+            />
           </div>
         </div>
       </div>

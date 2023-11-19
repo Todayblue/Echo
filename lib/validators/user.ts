@@ -23,3 +23,21 @@ export const UserValidator = z.object({
 });
 
 export type UserreationRequest = z.infer<typeof UserValidator>;
+
+export const UserSchema = z.object({
+  id: z.string(),
+  name: z.string().nullable(),
+  email: z.string().nullable(),
+  emailVerified: z.date().nullable(),
+  username: z.string().nullable(),
+  role: z.enum(["ADMIN", "USER"]),
+  image: z.string().nullable(),
+  Comment: z.array(z.unknown()), // Define CommentSchema if needed
+  CommentVote: z.array(z.unknown()), // Define CommentVoteSchema if needed
+  Post: z.array(z.unknown()), // Define PostSchema if needed
+  // Profile: z.object(ProfileSchema),
+  createdcommunity: z.array(z.unknown()), // Define communitySchema if needed
+  subscriptions: z.array(z.unknown()), // Define SubscriptionSchema if needed
+  votes: z.array(z.unknown()), // Define VoteSchema if needed
+  rule: z.array(z.unknown()), // Define RuleSchema if needed
+});
