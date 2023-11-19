@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { SubscribeToSubCommunityPayload } from "@/lib/validators/subCommunitySubscription";
+import { SubscribeToCommunityPayload } from "@/lib/validators/communitySubscription";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
@@ -11,14 +11,14 @@ import { useSession } from "next-auth/react";
 
 interface SubscribeLeaveToggleProps {
   isSubscribed: boolean;
-  subCommunityId: string;
-  subcommunityName: string;
+  communityId: string;
+  communityName: string;
 }
 
 const SubscribeLeaveToggle = ({
   isSubscribed,
-  subCommunityId,
-  subcommunityName,
+  communityId,
+  communityName,
 }: SubscribeLeaveToggleProps) => {
   const { toast } = useToast();
   const { loginToast } = useCustomToasts();
@@ -27,12 +27,11 @@ const SubscribeLeaveToggle = ({
 
   const { mutate: subscribe, isPending: isSubLoading } = useMutation({
     mutationFn: async () => {
-      const payload: SubscribeToSubCommunityPayload = {
-        subCommunityId,
-        userId: session?.user.id,
+      const payload: SubscribeToCommunityPayload = {
+        communityId,
       };
 
-      const { data } = await axios.post("/api/subcommunity/subscribe", payload);
+      const { data } = await axios.post("/api/communities/subscribe", payload);
       return data as string;
     },
     onError: (err) => {
@@ -56,20 +55,19 @@ const SubscribeLeaveToggle = ({
       });
       toast({
         title: "Subscribed!",
-        description: `You are now subscribed to r/${subcommunityName}`,
+        description: `You are now subscribed to r/${communityName}`,
       });
     },
   });
 
   const { mutate: unsubscribe, isPending: isUnsubLoading } = useMutation({
     mutationFn: async () => {
-      const payload: SubscribeToSubCommunityPayload = {
-        subCommunityId,
-        userId: session?.user.id,
+      const payload: SubscribeToCommunityPayload = {
+        communityId,
       };
 
       const { data } = await axios.post(
-        "/api/subcommunity/unsubscribe",
+        "/api/communities/unsubscribe",
         payload
       );
       return data as string;
@@ -89,7 +87,7 @@ const SubscribeLeaveToggle = ({
       });
       toast({
         title: "Unsubscribed!",
-        description: `You are now unsubscribed from/${subcommunityName}`,
+        description: `You are now unsubscribed from/${communityName}`,
       });
     },
   });

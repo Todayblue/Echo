@@ -19,37 +19,31 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const session = await getAuthSession();
 
-      const session = await getAuthSession();
+    const { title, description, communityId } = RuleValidator.parse(body);
 
-      if (!session?.user) {
-        return new Response("Unauthorized", { status: 401 });
+        const community = await prisma.community.findFirst({
+      where: {
+        id: communityId
       }
+    })
 
-
-    const { title, description, subCommunityId } =
-      RuleValidator.parse(body);
+    if (session?.user.id !== community?.creatorId) {
+      return new Response("Only created this community can create rules!!", { status: 401 });
+    }
 
     const rule = await prisma.rule.create({
       data: {
         title,
         description,
-        subCommunityId,
-        authorId: session.user.id
+        communityId,
+        authorId: session?.user.id,
       },
     });
 
-    return NextResponse.json(
-      { message: "Create Rule successfully", rule },
-      { status: 200 }
-    );
+    return NextResponse.json(rule);
   } catch (error) {
-    return NextResponse.json(
-      {
-        message: "Could not community rules this time. Please try later",
-        error,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json(error);
   }
 }

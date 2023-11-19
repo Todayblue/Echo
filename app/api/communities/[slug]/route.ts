@@ -1,14 +1,28 @@
 import { getAuthSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { generateSlug } from "@/lib/slugtify";
-import { SubCommunityValidator } from "@/lib/validators/subCommunitySubscription";
+import { CommunityValidator } from "@/lib/validators/community";
+
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-export async function GET() {
+export async function GET(
+  request: Request,
+  { params }: { params: { slug: string } }
+) {
   try {
-    const subCommunity = await prisma.subCommunity.findMany({
+    const community = await prisma.community.findFirst({
+      where: {
+        slug: params.slug,
+      },
       include: {
+        posts: {
+          include: {
+            author: true,
+            votes: true,
+          },
+        },
+        rule: true,
         subscribers: {
           include: {
             user: true,
@@ -17,10 +31,14 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(subCommunity);
+    if (!community) {
+      throw new Error("Community not found");
+    }
+
+    return NextResponse.json(community);
   } catch (error) {
     return NextResponse.json(
-      { message: "Could not get subCommunity", error },
+      { message: "Can't GET Community", error },
       { status: 500 }
     );
   }
@@ -35,23 +53,23 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name } = SubCommunityValidator.parse(body);
+    const { name } = CommunityValidator.parse(body);
 
     const slug = generateSlug(name);
 
     // check if subreddit already exists
-    const subCommunityExists = await prisma.subCommunity.findFirst({
+    const communityExists = await prisma.community.findFirst({
       where: {
         slug: slug,
       },
     });
 
-    if (subCommunityExists) {
-      return new Response("SubCommunity already exists", { status: 409 });
+    if (communityExists) {
+      return new Response("community already exists", { status: 409 });
     }
 
     // create subreddit and associate it with the user
-    const subCommunity = await prisma.subCommunity.create({
+    const community = await prisma.community.create({
       data: {
         name,
         slug: slug,
@@ -63,15 +81,15 @@ export async function POST(req: Request) {
     await prisma.subscription.create({
       data: {
         userId: session.user.id,
-        subCommunityId: subCommunity.id,
+        communityId: community.id,
       },
     });
 
-    return NextResponse.json(subCommunity.slug);
+    return NextResponse.json(community);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(error.message, { status: 422 });
     }
-    return new Response("Could not create subCommunity", { status: 500 });
+    return new Response("Could not create community", { status: 500 });
   }
 }

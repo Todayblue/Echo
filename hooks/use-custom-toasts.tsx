@@ -1,6 +1,5 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
 
 export const useCustomToasts = () => {

@@ -1,12 +1,12 @@
 import prisma from "@/lib/prisma";
-import { SubCommunitySubscriptionValidator } from "@/lib/validators/subCommunitySubscription";
+import { communitySubscriptionValidator } from "@/lib/validators/communitySubscription";
 import { z } from "zod";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { subCommunityId, userId } =
-      SubCommunitySubscriptionValidator.parse(body);
+    const { communityId, userId } =
+      communitySubscriptionValidator.parse(body);
 
     if (!userId) {
       return new Response("Unauthorized", { status: 401 });
@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     // check if user has already subscribed or not
     const subCommunityExists = await prisma.subscription.findFirst({
       where: {
-        subCommunityId,
+        communityId,
         userId: userId,
       },
     });
@@ -32,14 +32,14 @@ export async function POST(req: Request) {
     // create subreddit and associate it with the user
     await prisma.subscription.delete({
       where: {
-        userId_subCommunityId: {
-          subCommunityId,
+        userId_communityId: {
+          communityId,
           userId,
         },
       },
     });
 
-    return new Response(subCommunityId);
+    return new Response(communityId);
   } catch (error) {
     error;
     if (error instanceof z.ZodError) {

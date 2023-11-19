@@ -1,111 +1,73 @@
 "use client";
-import { useForm, useFormState } from "react-hook-form";
+import React from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { notFound, useRouter } from "next/navigation";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import router from "next/navigation";
-import { RuleValidator, RuleCreationRequest } from "@/lib/validators/rule";
+import { RuleCreationRequest, RuleValidator } from "@/lib/validators/rule";
 import { Textarea } from "@/components/ui/textarea";
-import { useSession } from "next-auth/react";
-import axios, { AxiosError } from "axios";
-import prisma from "@/lib/prisma";
+import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/hooks/use-toast";
-import { useEffect } from "react";
-import { useCustomToasts } from "@/hooks/use-custom-toasts";
-import {
-  CommunityCreationRequest,
-  CommunityValidator,
-} from "@/lib/validators/community";
 
-const getCommunityBySlug = async (slug: string) => {
-  const { data } = await axios.get(`/api/subcommunity/${slug}`);
-
-  return data.community;
+type CreateRuleProps = {
+  community: {
+    id: string;
+    slug: string | null;
+    name: string;
+    createdAt: Date | null;
+    updatedAt: Date | null;
+    creatorId: string;
+  };
 };
 
-export default function Page({
-  params: { slug },
-}: {
-  params: { slug: string };
-}) {
+export const CreateRule = ({ community }: CreateRuleProps) => {
   const router = useRouter();
-  const { loginToast } = useCustomToasts();
-
-  const { data: community, isLoading } = useQuery<CommunityCreationRequest>({
-    queryKey: ["community", slug],
-    queryFn: () => getCommunityBySlug(slug),
-  });
 
   const form = useForm<RuleCreationRequest>({
     resolver: zodResolver(RuleValidator),
     defaultValues: {
-      title: "",
+      communityId: community.id,
       description: "",
-      subCommunityId: community?.id,
+      title: "",
     },
   });
 
-  const createSubCommuRule = async (payload: RuleCreationRequest) => {
+  const createCommunityRule = async (payload: RuleCreationRequest) => {
     const { data } = await axios.post(
-      `/api/subcommunity/${slug}/rule`,
+      `/api/communities/${community.slug}/rules`,
       payload
     );
-
     return data;
   };
 
   const { mutate: createRule, isPending } = useMutation({
-    mutationFn: (values: RuleCreationRequest) => createSubCommuRule(values),
+    mutationFn: (values: RuleCreationRequest) => createCommunityRule(values),
     onError: (err) => {
-      if (err instanceof AxiosError) {
-        if (err.response?.status === 403) {
-          return toast({
-            title: "You are not subscribed to this community",
-            description: "Please subscribe to sub community.",
-            variant: "destructive",
-          });
-        }
-
-        // if (err.response?.status === 401) {
-        //   return loginToast();
-        // }
-      }
-
       toast({
         title: "There was an error.",
         description: "Could not create rules.",
         variant: "destructive",
       });
     },
-    onSuccess: (data) => {
-      console.log("data", data);
+    onSuccess: () => {
       toast({
-        title: "Create post",
-        description: "Created Rules successfully 📣",
+        title: "The rule has been successfully created. 🚀",
         variant: "default",
         duration: 2000,
       });
       setTimeout(() => {
-        router.push(`/community/${slug}`);
+        router.push(`/community/${community.slug}`);
         router.refresh();
       }, 1000);
     },
@@ -126,7 +88,7 @@ export default function Page({
           <div className="grid gap-6 pt-5">
             <CardHeader className="capitalize ">
               <CardTitle>Create </CardTitle>
-              <CardTitle>{community?.name}/Rules</CardTitle>
+              <CardTitle>{community.name}/Rules</CardTitle>
             </CardHeader>
             <div className="grid gap-2">
               <Label>Title</Label>
@@ -171,4 +133,4 @@ export default function Page({
       </form>
     </Form>
   );
-}
+};

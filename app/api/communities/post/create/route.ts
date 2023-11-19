@@ -1,9 +1,8 @@
 import prisma from "@/lib/prisma";
 import { PostValidator } from "@/lib/validators/post";
 import { z } from "zod";
-import slugify from "slugify";
-import cuid from "cuid";
 import { getAuthSession } from "@/lib/auth";
+import { generateSlug } from "@/lib/slugtify";
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +12,7 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    const { title, content, subCommunityId } = PostValidator.parse(body);
+    const { title, content, communityId } = PostValidator.parse(body);
 
     if (!session?.user) {
       return new Response("Unauthorized", { status: 401 });
@@ -23,10 +22,10 @@ export async function POST(req: Request) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    // verify user is subscribed to passed subCommunityId id
+    // verify user is subscribed to passed communityId id
     const subscription = await prisma.subscription.findFirst({
       where: {
-        subCommunityId,
+        communityId,
         userId: authorId,
       },
     });
@@ -38,24 +37,20 @@ export async function POST(req: Request) {
       );
     }
 
-    const id = cuid();
-    const slug = `${slugify(title, { lower: true })}-${id}`;
-
     const post = await prisma.post.create({
       data: {
-        id,
-        title,
-        content,
+        title: title,
+        content:content,
         authorId: authorId,
-        subCommunityId,
-        slug,
+        communityId: communityId,
+        slug:generateSlug(title),
       },
       include: {
-        subCommunity: true,
+        community: true,
       },
     });
 
-    return Response.json({ post, subCommunityName: post.subCommunity.name });
+    return Response.json({ post, communityName: post.community.name });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(error.message, { status: 400 });

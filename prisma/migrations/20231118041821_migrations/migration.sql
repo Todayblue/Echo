@@ -32,6 +32,16 @@ CREATE TABLE "Profile" (
 );
 
 -- CreateTable
+CREATE TABLE "Session" (
+    "id" TEXT NOT NULL,
+    "sessionToken" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Session_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "name" TEXT,
@@ -45,24 +55,24 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
-CREATE TABLE "SubCommunity" (
+CREATE TABLE "Community" (
     "id" TEXT NOT NULL,
     "slug" TEXT,
     "name" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
-    "creatorId" TEXT,
+    "creatorId" TEXT NOT NULL,
 
-    CONSTRAINT "SubCommunity_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Community_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Subscription" (
     "name" TEXT,
     "userId" TEXT NOT NULL,
-    "subCommunityId" TEXT NOT NULL,
+    "communityId" TEXT NOT NULL,
 
-    CONSTRAINT "Subscription_pkey" PRIMARY KEY ("userId","subCommunityId")
+    CONSTRAINT "Subscription_pkey" PRIMARY KEY ("userId","communityId")
 );
 
 -- CreateTable
@@ -74,7 +84,7 @@ CREATE TABLE "Post" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "authorId" TEXT NOT NULL,
-    "subCommunityId" TEXT NOT NULL,
+    "communityId" TEXT NOT NULL,
 
     CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
 );
@@ -85,7 +95,7 @@ CREATE TABLE "Rule" (
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "authorId" TEXT NOT NULL,
-    "subCommunityId" TEXT NOT NULL,
+    "communityId" TEXT NOT NULL,
 
     CONSTRAINT "Rule_pkey" PRIMARY KEY ("id")
 );
@@ -128,16 +138,19 @@ CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provi
 CREATE UNIQUE INDEX "Profile_userId_key" ON "Profile"("userId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SubCommunity_name_key" ON "SubCommunity"("name");
+CREATE UNIQUE INDEX "Community_name_key" ON "Community"("name");
 
 -- CreateIndex
-CREATE INDEX "SubCommunity_name_idx" ON "SubCommunity"("name");
+CREATE INDEX "Community_name_idx" ON "Community"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Subscription_name_key" ON "Subscription"("name");
@@ -149,10 +162,13 @@ ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "Profile" ADD CONSTRAINT "Profile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SubCommunity" ADD CONSTRAINT "SubCommunity_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_subCommunityId_fkey" FOREIGN KEY ("subCommunityId") REFERENCES "SubCommunity"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Community" ADD CONSTRAINT "Community_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_communityId_fkey" FOREIGN KEY ("communityId") REFERENCES "Community"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -161,13 +177,13 @@ ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_userId_fkey" FOREIGN KEY
 ALTER TABLE "Post" ADD CONSTRAINT "Post_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Post" ADD CONSTRAINT "Post_subCommunityId_fkey" FOREIGN KEY ("subCommunityId") REFERENCES "SubCommunity"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Post" ADD CONSTRAINT "Post_communityId_fkey" FOREIGN KEY ("communityId") REFERENCES "Community"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Rule" ADD CONSTRAINT "Rule_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Rule" ADD CONSTRAINT "Rule_subCommunityId_fkey" FOREIGN KEY ("subCommunityId") REFERENCES "SubCommunity"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Rule" ADD CONSTRAINT "Rule_communityId_fkey" FOREIGN KEY ("communityId") REFERENCES "Community"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Comment" ADD CONSTRAINT "Comment_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

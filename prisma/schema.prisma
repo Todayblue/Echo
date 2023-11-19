@@ -33,32 +33,41 @@ model Profile {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model User {
-  id                  String         @id @default(cuid())
-  name                String?
-  email               String?        @unique
-  emailVerified       DateTime?
-  username            String?        @unique
-  role                Role           @default(USER)
-  image               String?
-  accounts            Account[]
-  Comment             Comment[]
-  CommentVote         CommentVote[]
-  Post                Post[]
-  Profile             Profile?
-  createdSubCommunity SubCommunity[] @relation("CreatedBy")
-  subscriptions       Subscription[]
-  votes               Vote[]
-  rule                Rule[]
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model SubCommunity {
+model User {
+  id               String         @id @default(cuid())
+  name             String?
+  email            String?        @unique
+  emailVerified    DateTime?
+  username         String?        @unique
+  role             Role           @default(USER)
+  image            String?
+  accounts         Account[]
+  Comment          Comment[]
+  CommentVote      CommentVote[]
+  Post             Post[]
+  Profile          Profile?
+  createdCommunity Community[]    @relation("CreatedBy")
+  subscriptions    Subscription[]
+  votes            Vote[]
+  rule             Rule[]
+  Session          Session[]
+}
+
+model Community {
   id          String         @id @default(cuid())
   slug        String?
   name        String         @unique
   createdAt   DateTime?      @default(now())
   updatedAt   DateTime?      @updatedAt
-  creatorId   String?
+  creatorId   String
   posts       Post[]
   creator     User?          @relation("CreatedBy", fields: [creatorId], references: [id])
   subscribers Subscription[]
@@ -68,38 +77,38 @@ model SubCommunity {
 }
 
 model Subscription {
-  name           String?      @unique
-  userId         String
-  subCommunityId String
-  subCommunity   SubCommunity @relation(fields: [subCommunityId], references: [id])
-  user           User         @relation(fields: [userId], references: [id])
+  name        String?   @unique
+  userId      String
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
 
-  @@id([userId, subCommunityId])
+  @@id([userId, communityId])
 }
 
 model Post {
-  id             String       @id @default(cuid())
-  slug           String?
-  title          String
-  content        String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  authorId       String
-  subCommunityId String
-  comments       Comment[]
-  author         User         @relation(fields: [authorId], references: [id])
-  subCommunity   SubCommunity @relation(fields: [subCommunityId], references: [id], onDelete: Cascade)
-  votes          Vote[]
+  id          String    @id @default(cuid())
+  slug        String?
+  title       String
+  content     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  authorId    String
+  communityId String
+  votes       Vote[]
+  comments    Comment[]
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  author      User      @relation(fields: [authorId], references: [id])
 }
 
 model Rule {
-  id             String       @id @default(cuid())
-  title          String
-  description    String
-  authorId       String
-  subCommunityId String
-  author         User         @relation(fields: [authorId], references: [id])
-  subCommunity   SubCommunity @relation(fields: [subCommunityId], references: [id], onDelete: Cascade)
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  authorId    String
+  communityId String
+  author      User      @relation(fields: [authorId], references: [id])
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
 }
 
 model Comment {

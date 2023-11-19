@@ -2,7 +2,7 @@
 
 import { LIMIT_POST } from "@/lib/constants";
 import { useIntersection } from "@mantine/hooks";
-import { Comment, Post, SubCommunity, User, Vote } from "@prisma/client";
+import { Comment, Post, Community, User, Vote } from "@prisma/client";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
@@ -11,7 +11,7 @@ import { useEffect, useRef } from "react";
 import PostCard from "./community/PostCard";
 
 type ExtendedPost = Post & {
-  subCommunity: SubCommunity;
+  community: Community;
   votes: Vote[];
   author: User;
   comments: Comment[];
@@ -19,10 +19,10 @@ type ExtendedPost = Post & {
 
 type PostsFeedProps = {
   initPosts: ExtendedPost[];
-  subCommunityName?: string;
+  communityName?: string;
 };
 
-const PostsFeed = ({ initPosts, subCommunityName }: PostsFeedProps) => {
+const PostsFeed = ({ initPosts, communityName }: PostsFeedProps) => {
   const { data: session } = useSession();
 
   const lastPostRef = useRef<HTMLElement>(null);
@@ -34,7 +34,7 @@ const PostsFeed = ({ initPosts, subCommunityName }: PostsFeedProps) => {
   const fetchPosts = async ({ pageParam = 1 }) => {
     const query =
       `/api/posts?limit=${LIMIT_POST}&page=${pageParam}` +
-      (!!subCommunityName ? `&subcommunity=${subCommunityName}` : "");
+      (!!communityName ? `&community=${communityName}` : "");
 
     const { data } = await axios.get(query);
 
@@ -76,7 +76,7 @@ const PostsFeed = ({ initPosts, subCommunityName }: PostsFeedProps) => {
               <PostCard
                 key={post.id}
                 id={post.id}
-                commu={subCommunityName}
+                commu={communityName}
                 author={post.author.name}
                 title={post.title}
                 content={post.content}
@@ -91,7 +91,7 @@ const PostsFeed = ({ initPosts, subCommunityName }: PostsFeedProps) => {
             <PostCard
               key={post.id}
               id={post.id}
-              commu={subCommunityName}
+              commu={communityName}
               author={post.author.name}
               title={post.title}
               content={post.content}

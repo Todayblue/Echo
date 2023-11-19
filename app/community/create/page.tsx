@@ -4,26 +4,24 @@ import { Input } from "@/components/ui/input";
 import { useCustomToasts } from "@/hooks/use-custom-toasts";
 import { toast } from "@/hooks/use-toast";
 import { generateSlug } from "@/lib/slugtify";
-import { CreateSubCommunityPayload } from "@/lib/validators/subCommunitySubscription";
+import { CreateCommunityPayload } from "@/lib/validators/community";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const Page = () => {
   const router = useRouter();
   const [input, setInput] = useState<string>("");
-  const { data: session } = useSession();
   const { loginToast } = useCustomToasts();
 
   const { mutate: createCommunity, isPending } = useMutation({
     mutationFn: async () => {
-      const payload: CreateSubCommunityPayload = {
+      const payload: CreateCommunityPayload = {
         name: input,
       };
-      const { data } = await axios.post("/api/subcommunity", payload);
-      console.log("data", data);
+      const { data } = await axios.post("/api/communities", payload);
+
       return data as string;
     },
     onError: (err) => {
@@ -34,7 +32,7 @@ const Page = () => {
 
         if (err.response?.status === 409) {
           return toast({
-            title: "Subreddit already exists.",
+            title: "This community already exists.",
             description: "Please choose a different name.",
             variant: "destructive",
           });
@@ -42,7 +40,7 @@ const Page = () => {
 
         if (err.response?.status === 422) {
           return toast({
-            title: "Invalid subreddit name.",
+            title: "Invalid community name.",
             description: "Please choose a name between 3 and 21 letters.",
             variant: "destructive",
           });
@@ -51,18 +49,24 @@ const Page = () => {
 
       toast({
         title: "There was an error.",
-        description: "Could not create subreddit.",
+        description: "Could not create community.",
         variant: "destructive",
       });
     },
+
     onSuccess: (data) => {
-      router.push(`/community/${generateSlug(data)}`);
+      console.log("data", data);
+      toast({
+        title: `${data} community was successfully created. 📣`,
+        variant: "default",
+        duration: 2000,
+      });
+      setTimeout(() => {
+        router.push(`/community/${generateSlug(data)}`);
+        router.refresh();
+      }, 1000);
     },
   });
-
-  // if (!session) {
-  //   return loginToast();
-  // }
 
   return (
     <div className="container flex items-center h-full max-w-3xl mx-auto py-12">
