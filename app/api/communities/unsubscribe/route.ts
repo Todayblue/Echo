@@ -1,14 +1,16 @@
+import { getAuthSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { communitySubscriptionValidator } from "@/lib/validators/communitySubscription";
 import { z } from "zod";
 
 export async function POST(req: Request) {
   try {
+  const session = await getAuthSession();
     const body = await req.json();
-    const { communityId, userId } =
+    const { communityId } =
       communitySubscriptionValidator.parse(body);
 
-    if (!userId) {
+    if (!session?.user) {
       return new Response("Unauthorized", { status: 401 });
     }
 
@@ -16,7 +18,7 @@ export async function POST(req: Request) {
     const subCommunityExists = await prisma.subscription.findFirst({
       where: {
         communityId,
-        userId: userId,
+        userId: session.user.id,
       },
     });
 
@@ -34,7 +36,7 @@ export async function POST(req: Request) {
       where: {
         userId_communityId: {
           communityId,
-          userId,
+          userId: session.user.id,
         },
       },
     });
