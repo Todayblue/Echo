@@ -62,16 +62,18 @@ model User {
 }
 
 model Community {
-  id          String         @id @default(cuid())
-  slug        String?
-  name        String         @unique
-  createdAt   DateTime?      @default(now())
-  updatedAt   DateTime?      @updatedAt
-  creatorId   String
-  posts       Post[]
-  creator     User?          @relation("CreatedBy", fields: [creatorId], references: [id])
-  subscribers Subscription[]
-  rule        Rule[]
+  id           String         @id @default(cuid())
+  slug         String?
+  name         String         @unique
+  description  String?
+  profileImage String?
+  createdAt    DateTime?      @default(now())
+  updatedAt    DateTime?      @updatedAt
+  creatorId    String
+  posts        Post[]
+  creator      User?          @relation("CreatedBy", fields: [creatorId], references: [id])
+  subscribers  Subscription[]
+  rule         Rule[]
 
   @@index([name])
 }
