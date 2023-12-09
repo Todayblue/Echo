@@ -1,16 +1,5 @@
 import PostsFeed from "@/components/PostsFeed";
 import SubscribeLeaveToggle from "@/components/SubscribeLeaveToggle";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import CommuAvatar from "@/components/community/CommuAvatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -22,14 +11,8 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Pencil, Trash } from "lucide-react";
 import RuleList from "@/components/community/rule/RuleList";
+import AboutCommunity from "@/components/community/comment/AboutCommunity";
 
 type communityOption = {
   page?: number;
@@ -145,7 +128,7 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
                 <AvatarImage src={session?.user.image} />
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
-              <Link className="w-full" href={`/community/${slug}/create-post`}>
+              <Link className="w-full" href={`/community/${slug}/post/create`}>
                 <Input placeholder="Create Post..." />
               </Link>
             </div>
@@ -154,41 +137,13 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
 
           {/* info sidebar */}
           <div className="col-span-2  space-y-4">
-            <div className="w-screen md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
-              <div className="mx-6 pt-4 ">
-                <p className="font-semibold py-3 border-b border-gray-300 ">
-                  About Community
-                </p>
-              </div>
-              <dl className="divide-y divide-gray-100 px-6 py-4 text-sm leading-4 ">
-                <div className="flex justify-between gap-x-4 py-3">
-                  <dt className="text-gray-500">Created</dt>
-                  <dd className="text-gray-700">
-                    <time dateTime={community?.createdAt?.toDateString()}>
-                      {community?.createdAt
-                        ? format(community.createdAt, "MMMM d, yyyy")
-                        : "N/A"}
-                    </time>
-                  </dd>
-                </div>
-                <div className="flex justify-between gap-x-4 py-3">
-                  <dt className="text-gray-500">Members</dt>
-                  <dd className="flex items-start gap-x-2">
-                    <div className="text-gray-900">{memberCount}</div>
-                  </dd>
-                </div>
-                {community.creatorId === session?.user?.id ? (
-                  <div className="flex justify-between gap-x-4 py-3">
-                    <dt className="text-gray-500">
-                      You created this community
-                    </dt>
-                  </div>
-                ) : null}
-                <Link href={`/community/${slug}/create-post`}>
-                  <Button className="w-full">Create Post</Button>
-                </Link>
-              </dl>
-            </div>
+            <AboutCommunity
+              session={session}
+              memberCount={memberCount}
+              slug={community.slug}
+              createdAt={community.createdAt}
+              creatorId={community.creatorId}
+            />
             <RuleList
               session={session}
               communityCreatorId={community.creatorId}

@@ -1,9 +1,26 @@
 import AboutCommunity from "@/components/community/comment/AboutCommunity";
 import RuleList from "@/components/community/rule/RuleList";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { getAuthSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { format } from "date-fns";
+import { Pencil, Trash } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 

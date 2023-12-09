@@ -66,37 +66,38 @@ const PostCard = ({
               <p>{formatTimeToNow(new Date(createdAt))}</p>
             </div>
           </div>
-          <div className="text-gray-900 font-bold text-xl">{title}</div>
 
-          {image && (
-            <figure className="flex justify-center pt-4">
-              <Image
-                src={image}
-                alt={`picture of ${author}`}
-                width={500}
-                height={500}
-                className="m-h-[512px]"
-              />
-            </figure>
-          )}
+          <Link href={`/community/${commu}/post/${id}`}>
+            <div className="text-gray-900 font-bold text-xl">{title}</div>
 
-          <div
-            className="relative text-sm max-h-40 w-full overflow-clip"
-            ref={pRef}
-          >
-            {cleanContent ? (
-              <div
-                className="text-gray-700"
-                dangerouslySetInnerHTML={{ __html: cleanContent }}
-              />
-            ) : null}
-
-            {/* h-40 = 160px */}
-            {isLongContent ? (
-              // blur bottom if content is too long
-              <div className="absolute bottom-0 left-0 h-24 w-full bg-gradient-to-t from-white to-transparent"></div>
-            ) : null}
-          </div>
+            {image && (
+              <figure className="flex justify-center pt-4">
+                <Image
+                  src={image}
+                  alt={`picture of ${author}`}
+                  width={500}
+                  height={500}
+                  className="m-h-[512px]"
+                />
+              </figure>
+            )}
+            <div
+              className="relative text-sm max-h-40 w-full overflow-clip"
+              ref={pRef}
+            >
+              {cleanContent ? (
+                <div
+                  className="text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: cleanContent }}
+                />
+              ) : null}
+              {/* h-40 = 160px */}
+              {isLongContent ? (
+                // blur bottom if content is too long
+                <div className="absolute bottom-0 left-0 h-24 w-full bg-gradient-to-t from-white to-transparent"></div>
+              ) : null}
+            </div>
+          </Link>
         </div>
       </div>
     </div>
