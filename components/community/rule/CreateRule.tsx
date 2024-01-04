@@ -45,7 +45,7 @@ export const CreateRule = ({ community }: CreateRuleProps) => {
 
   const createCommunityRule = async (payload: RuleCreationRequest) => {
     const { data } = await axios.post(
-      `/api/communities/${community.slug}/rules`,
+      `/api/community/${community.slug}/rules`,
       payload
     );
     return data;

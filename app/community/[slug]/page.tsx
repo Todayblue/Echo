@@ -1,18 +1,18 @@
-import PostsFeed from "@/components/PostsFeed";
+import dynamic from "next/dynamic";
 import SubscribeLeaveToggle from "@/components/SubscribeLeaveToggle";
-import CommuAvatar from "@/components/community/CommuAvatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LIMIT_POST } from "@/lib/constants";
 import { getAuthSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { format } from "date-fns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import RuleList from "@/components/community/rule/RuleList";
 import AboutCommunity from "@/components/community/comment/AboutCommunity";
+import CommunityAvatar from "@/components/community/CommunityAvatar";
+import CommunityAvatarUpload from "@/components/community/CommunityAvatarUpload";
+import PostsFeed from "@/components/PostsFeed";
 
 type communityOption = {
   page?: number;
@@ -83,25 +83,24 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
   return (
     <>
       {/* bg */}
-      <div className="min-w-full pt-4">
+      <div className=" ">
         <div className="bg-sky-500 h-20"></div>
       </div>
       <div className="relative w-full h-24 py-3 bg-white border border-b-gray-200">
         <div className="mx-32">
           <div className="absolute -top-2 ">
-            <CommuAvatar />
+            <CommunityAvatar
+              communityName={community.name}
+              profileImage={community.profileImage || ""}
+            />
           </div>
           {/* text */}
           <div className="pl-24">
             <div className="flex gap-2 ">
-              <div>
-                <h1 className="text-xl md:text-3xl tracking-wider capitalize font-black">
-                  {slug}
-                </h1>
-                <p className="flex items-center space-x-1 mt-1 text-gray-500">
-                  {slug}
-                </p>
-              </div>
+              <h1 className="text-xl md:text-3xl tracking-wider capitalize font-black pt-2">
+                {slug}
+              </h1>
+
               <div className="px-4">
                 {/* <Button className="bg-blue-500 rounded-2xl px-10 hover:bg-blue-300"> */}
                 {community.creatorId !== session?.user?.id ? (
@@ -119,7 +118,7 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
 
       {/* content */}
       <div className="grid  min-h-screen  bg-gray-200">
-        <div className="grid  mx-auto w-4/5 grid-cols-6 gap-x-6   py-6">
+        <div className="grid  mx-auto w-4/5 grid-cols-6 gap-x-6 py-6">
           {/* <ToFeedButton /> */}
 
           <div className="col-span-4 space-y-4">
@@ -132,12 +131,14 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
                 <Input placeholder="Create Post..." />
               </Link>
             </div>
-            <PostsFeed initPosts={community.posts} communityName={slug} />
+            <PostsFeed initPosts={community.posts} communitySlug={slug} />
           </div>
 
           {/* info sidebar */}
           <div className="col-span-2  space-y-4">
             <AboutCommunity
+              description={community.description}
+              title={community.title}
               session={session}
               memberCount={memberCount}
               slug={community.slug}

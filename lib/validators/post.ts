@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const PostValidator = z.object({
   communityId: z.string({ required_error: "Community is required" }),
+  imageUrl: z.string().optional(),
   title: z
     .string({ required_error: "Title is required" })
     .min(3, {

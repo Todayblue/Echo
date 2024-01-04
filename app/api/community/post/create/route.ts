@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    const { title, content, communityId } = PostValidator.parse(body);
+    const { title, content, communityId, imageUrl } = PostValidator.parse(body);
 
     if (!session?.user) {
       return new Response("Unauthorized", { status: 401 });
@@ -43,6 +43,7 @@ export async function POST(req: Request) {
         content:content,
         authorId: authorId,
         communityId: communityId,
+        imageUrl: imageUrl,
         slug:generateSlug(title),
       },
       include: {

@@ -54,7 +54,7 @@ export const UpdateRule = ({ community, rule }: editeRuleProps) => {
 
   const editCommunityRule = async (payload: RuleUpdationRequest) => {
     const { data } = await axios.patch(
-      `/api/communities/${community.slug}/rules/${rule.id}`,
+      `/api/community/${community.slug}/rules/${rule.id}`,
       payload
     );
     return data;

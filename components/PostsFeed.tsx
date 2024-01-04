@@ -19,10 +19,10 @@ type ExtendedPost = Post & {
 
 type PostsFeedProps = {
   initPosts: ExtendedPost[];
-  communityName?: string;
+  communitySlug?: string;
 };
 
-const PostsFeed = ({ initPosts, communityName }: PostsFeedProps) => {
+const PostsFeed = ({ initPosts, communitySlug }: PostsFeedProps) => {
   const { data: session } = useSession();
 
   const lastPostRef = useRef<HTMLElement>(null);
@@ -34,7 +34,7 @@ const PostsFeed = ({ initPosts, communityName }: PostsFeedProps) => {
   const fetchPosts = async ({ pageParam = 1 }) => {
     const query =
       `/api/posts?limit=${LIMIT_POST}&page=${pageParam}` +
-      (!!communityName ? `&community=${communityName}` : "");
+      (!!communitySlug ? `&community=${communitySlug}` : "");
 
     const { data } = await axios.get(query);
 
@@ -55,7 +55,7 @@ const PostsFeed = ({ initPosts, communityName }: PostsFeedProps) => {
     }
   }, [entry, fetchNextPage]);
 
-  const posts = data?.pages.flatMap((page: any) => page) ?? initPosts;
+  const posts = data.pages.flatMap((page: any) => page) ?? initPosts;
 
   return (
     <ul className="flex flex-col gap-y-2">
@@ -76,7 +76,9 @@ const PostsFeed = ({ initPosts, communityName }: PostsFeedProps) => {
               <PostCard
                 key={post.id}
                 id={post.id}
-                commu={communityName}
+                slug={post.community.slug}
+                image={post.imageUrl}
+                commu={post.community.name}
                 author={post.author.name}
                 title={post.title}
                 content={post.content}
@@ -91,7 +93,9 @@ const PostsFeed = ({ initPosts, communityName }: PostsFeedProps) => {
             <PostCard
               key={post.id}
               id={post.id}
-              commu={communityName}
+              slug={post.community.slug}
+              image={post.imageUrl}
+              commu={post.community.name}
               author={post.author.name}
               title={post.title}
               content={post.content}

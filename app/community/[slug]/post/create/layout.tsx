@@ -74,6 +74,8 @@ export default async function Layout({
           {/* info sidebar */}
           <div className="col-span-2 flex flex-col space-y-4">
             <AboutCommunity
+              title={community.title}
+              description={community.description}
               session={session}
               memberCount={memberCount}
               slug={community.slug}

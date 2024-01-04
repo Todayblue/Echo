@@ -7,6 +7,8 @@ type AboutCommunityProp = {
   memberCount: number;
   createdAt: Date | null;
   creatorId: string;
+  title: string | null;
+  description: string | null;
   slug: string | null;
   session: {
     user: {
@@ -22,14 +24,15 @@ const AboutCommunity = ({
   creatorId,
   createdAt,
   slug,
+  title,
+  description,
   session,
 }: AboutCommunityProp) => {
   return (
     <div className="w-screen md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
       <div className="mx-6 pt-4 ">
-        <p className="font-semibold py-3 border-b border-gray-300 ">
-          About Community
-        </p>
+        <p className="font-semibold py-3 border-b border-gray-300 ">{title}</p>
+        <p className="pt-3 text-sm text-muted-foreground">{description}</p>
       </div>
       <dl className="divide-y divide-gray-100 px-6 py-4 text-sm leading-4 ">
         <div className="flex justify-between gap-x-4 py-3">

@@ -36,7 +36,7 @@ export const AlertDialogDelete = ({
 
   const editCommunityRule = async () => {
     const { data } = await axios.delete(
-      `/api/communities/${communitySlug}/rules/${ruleId}`
+      `/api/community/${communitySlug}/rules/${ruleId}`
     );
     return data;
   };

@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name } = CommunityValidator.parse(body);
+    const { name,description,title,profileImage } = CommunityValidator.parse(body);
 
     const slug = generateSlug(name);
 
@@ -55,6 +55,9 @@ export async function POST(req: Request) {
       data: {
         name,
         slug: slug,
+        profileImage: profileImage,
+        title: title,
+        description: description,
         creatorId: session.user.id,
       },
     });
