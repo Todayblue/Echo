@@ -1,4 +1,5 @@
 import ChooseCommunity from "@/components/ChooseCommunity";
+import CommunityPostCard from "@/components/CommunityPostCard";
 import CustomFeed from "@/components/homepage/CustomFeed";
 import GeneralFeed from "@/components/homepage/GeneralFeed";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -13,13 +14,38 @@ export const fetchCache = "force-no-store";
 export default async function Home() {
   const session = await getAuthSession();
 
+  const communityPosts = await prisma.community.findMany({
+    include: {
+      posts: {
+        take: 10,
+        include: {
+          comments: true,
+          author: true,
+        },
+      },
+    },
+  });
+
   return (
     <div className="grid mx-auto w-4/5 grid-cols-6 gap-x-6 py-6">
       <div className="col-span-4 space-y-4">
         {/* border border-gray-300 bg-white p-4 flex leading-normal rounded-lg */}
-        <ChooseCommunity />
         <div>
-          <GeneralFeed />
+          <ChooseCommunity />
+        </div>
+        <div className="">
+          {communityPosts.map((community) => (
+            <div key={community.id} className="mb-4">
+              {/* Add margin-bottom */}
+              <CommunityPostCard
+                communitySlug={community.slug}
+                communityName={community.name}
+                communityDescription={community.description}
+                communityImage={community.profileImage}
+                posts={community.posts}
+              />
+            </div>
+          ))}
         </div>
       </div>
 
@@ -39,7 +65,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <Link href={`/r/create`}>
+          <Link href={`/community/create`}>
             <Button>Create Community</Button>
           </Link>
         </dl>

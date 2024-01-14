@@ -60,6 +60,8 @@ model User {
   votes            Vote[]
   rule             Rule[]
   Session          Session[]
+  Blog             Blog[]
+  Tag              Tag[]
 }
 
 model Community {
@@ -160,4 +162,25 @@ enum Role {
 enum VoteType {
   UP
   DOWN
+}
+
+model Blog {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  slug       String?  @unique
+  title      String?
+  content    String?
+  coverImage String?
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId   String
+  tags       Tag[]
+}
+
+model Tag {
+  id       Int     @id @default(autoincrement())
+  slug     String? @unique
+  blogs    Blog[]
+  name     String  @unique
+  author   User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
 }

@@ -15,19 +15,29 @@ const GeneralFeed = async () => {
         orderBy: {
           createdAt: "desc",
         },
-        take: INFINITE_SCROLL_PAGINATION_RESULTS,
       },
     },
   });
 
   return (
-    <div className="grid grid-cols-2">
-      {/* Render community posts with additional information */}
-      {communityPosts.map((community) => (
-        <div key={community.id}>
-          <h2>{community.name}</h2>
-        </div>
-      ))}
+    // <div>
+    //   {/* Render community posts with additional information */}
+    //   {communityPosts.map((community) => (
+    //     <div
+    //       key={community.id}
+    //       className="grid border border-gray-300 rounded-lg my-4"
+    //     >
+    //       <h2 className="mx-4">{community.name}</h2>
+    //       <p className="mx-4 truncate">{community.description}</p>
+    //     </div>
+    //   ))}
+    // </div>
+    <div className="bg-white rounded-lg shadow-md p-4">
+      <div className="bg-indigo-500 text-white py-2 px-4 rounded-t-lg">
+        <h2 className="text-lg font-bold">Community Name</h2>
+        <p className="text-sm">Community Description</p>
+      </div>
+      <div className="mt-4"></div>
     </div>
   );
 };

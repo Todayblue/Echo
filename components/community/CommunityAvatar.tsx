@@ -4,13 +4,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 interface Props {
   profileImage?: string;
   communityName: string;
+  className?: string | undefined;
 }
 
-const CommunityAvatar = ({ profileImage, communityName }: Props) => {
+const CommunityAvatar = ({ profileImage, communityName, className }: Props) => {
   return (
-    <div className="w-20 h-20">
+    <div className={className}>
       <Avatar className="w-full h-full ring-4 ring-white">
-        <AvatarImage src={profileImage} alt="commu avatar" className="" />
+        <AvatarImage src={profileImage} alt="commu avatar" />
         <AvatarFallback>{communityName}</AvatarFallback>
       </Avatar>
     </div>

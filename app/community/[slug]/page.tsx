@@ -90,29 +90,27 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
         <div className="mx-32">
           <div className="absolute -top-2 ">
             <CommunityAvatar
+              className="w-24 h-24"
               communityName={community.name}
               profileImage={community.profileImage || ""}
             />
           </div>
-          {/* text */}
-          <div className="pl-24">
-            <div className="flex gap-2 ">
-              <h1 className="text-xl md:text-3xl tracking-wider capitalize font-black pt-2">
-                {slug}
-              </h1>
+          <div className="flex items-center pl-28 space-x-4">
+            <h1 className="text-xl md:text-3xl tracking-wider capitalize font-black ">
+              {community.name}
+            </h1>
 
-              <div className="px-4">
-                {/* <Button className="bg-blue-500 rounded-2xl px-10 hover:bg-blue-300"> */}
-                {community.creatorId !== session?.user?.id ? (
-                  <SubscribeLeaveToggle
-                    isSubscribed={isSubscribed}
-                    communityId={community.id}
-                    communityName={community.name}
-                  />
-                ) : null}
-              </div>
+            <div>
+              {community.creatorId !== session?.user?.id ? (
+                <SubscribeLeaveToggle
+                  isSubscribed={isSubscribed}
+                  communityId={community.id}
+                  communityName={community.name}
+                />
+              ) : null}
             </div>
           </div>
+          {/* text */}
         </div>
       </div>
 

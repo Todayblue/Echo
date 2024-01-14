@@ -91,7 +91,7 @@ const SubscribeLeaveToggle = ({
 
   return isSubscribed ? (
     <Button
-      className="mt-1 mb-4 rounded-3xl w-20 h-8 "
+      className="mt-5 mb-4 rounded-3xl w-20 h-8 "
       variant="default"
       isLoading={isUnsubLoading}
       onClick={() => unsubscribe()}
@@ -100,7 +100,7 @@ const SubscribeLeaveToggle = ({
     </Button>
   ) : (
     <Button
-      className="mt-1 mb-4 rounded-3xl w-20 h-8 "
+      className="mt-5 mb-4 rounded-3xl w-20 h-8 "
       variant="default"
       isLoading={isSubLoading}
       onClick={() => subscribe()}
