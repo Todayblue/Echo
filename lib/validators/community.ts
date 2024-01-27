@@ -6,7 +6,7 @@ export const CommunityValidator = z.object({
   name: z.string().min(3).max(21),
   title: z.string().min(3).max(100),
   description: z.string().max(300),
-  profileImage: z.string().optional(),
+  profileImage: z.string()
 });
 
 export const CommunitySubscriptionValidator = z.object({

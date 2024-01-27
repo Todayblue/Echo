@@ -44,7 +44,9 @@ export async function POST(request: Request) {
 
     const tag = await prisma.tag.create({
       data: {
-        
+        name: name,
+        authorId: session.user.id,
+        slug: slug,
       }
     })
 

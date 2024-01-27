@@ -50,7 +50,7 @@ interface CloudinaryResource {
 const CommunityCreate = () => {
   const router = useRouter();
   const { loginToast } = useCustomToasts();
-  const [fileURL, setFileURL] = useState<string | undefined>();
+  const [fileURL, setFileURL] = useState<string>();
   const [file, setFile] = useState<File | undefined>();
   const [sneakers, setSneakers] = useState<Array<CloudinaryResource>>();
 
@@ -141,6 +141,7 @@ const CommunityCreate = () => {
     if (uploadedFile) {
       setFile(uploadedFile);
       setFileURL(URL.createObjectURL(uploadedFile));
+      form.setValue("profileImage", "");
     }
   };
 
@@ -151,82 +152,91 @@ const CommunityCreate = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
-        <div className="grid mx-auto w-3/5">
+        <div className="grid mx-auto w-2/5">
           <div className="grid gap-6 pt-5 ">
             <div className="grid p-4 border-b border-gray-300">
               <h1 className="font-bold text-xl ">Create a Community</h1>
             </div>
-            <div className="grid grid-cols-6 gap-x-6">
-              <label
-                htmlFor="coverImage"
-                className="grid col-span-1 place-items-center  cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
-              >
-                <Avatar placeholder="asdas" className="w-24 h-24">
-                  {fileURL ? (
-                    <AvatarImage src={fileURL}></AvatarImage>
-                  ) : (
-                    <AvatarFallback>
-                      <FileImage />
-                    </AvatarFallback>
+            <div className="grid gap-y-4">
+              <div className="grid gap-2">
+                <label
+                  htmlFor="coverImage"
+                  className="grid gap-y-3 col-span-1 "
+                >
+                  <div className="grid place-items-center">
+                    <Avatar className="w-24 h-24 ">
+                      {fileURL ? (
+                        <AvatarImage src={fileURL}></AvatarImage>
+                      ) : (
+                        <AvatarFallback>
+                          <FileImage />
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                  </div>
+                  <Label>Community Image</Label>
+                  <FormField
+                    control={form.control}
+                    name="profileImage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            name="coverImage"
+                            type="file"
+                            onChange={onImageUpload}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </label>
+              </div>
+              <div className="grid gap-2">
+                <Label>Community names</Label>
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input {...field} className="pl-6" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </Avatar>
-                <input
-                  id="coverImage"
-                  name="coverImage"
-                  type="file"
-                  className="sr-only"
-                  onChange={onImageUpload}
                 />
-              </label>
-
-              <div className="grid col-span-5 gap-6 ">
-                <div className="grid gap-2">
-                  <Label>
-                    Community names including capitalization cannot be changed.
-                  </Label>
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input {...field} className="pl-6" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label>Community title.</Label>
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input {...field} className="pl-6" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label>Community description.</Label>
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input className="pl-6" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label>Community title.</Label>
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input {...field} className="pl-6" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Community description.</Label>
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input className="pl-6" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
           </div>

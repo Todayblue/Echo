@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { PenSquare } from "lucide-react";
-import { BookText } from "lucide-react";
 
 export function MainNav({
   className,
@@ -15,11 +13,11 @@ export function MainNav({
       )}
       {...props}
     >
-      <Link href="post/create">
-        <PenSquare className="w-6 h-6" />
-      </Link>
-      <Link href="/blogs">
-        <BookText className="w-6 h-6" />
+      <Link
+        href="/feed"
+        className="text-sm font-medium transition-colors hover:text-gray-300"
+      >
+        Feed
       </Link>
     </nav>
   );

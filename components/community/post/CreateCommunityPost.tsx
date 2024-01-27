@@ -57,7 +57,7 @@ type CreateCommunityPostProps = {
     createdAt: Date | null;
     updatedAt: Date | null;
     creatorId: string;
-  };
+  } | null;
   communities: {
     id: string;
     slug: string | null;
@@ -93,7 +93,7 @@ const CreateCommunityPost = ({
   const form = useForm<PostCreationRequest>({
     resolver: zodResolver(PostValidator),
     defaultValues: {
-      communityId: community.id,
+      communityId: community?.id,
     },
   });
 
@@ -141,24 +141,24 @@ const CreateCommunityPost = ({
       });
     },
     onSuccess: (data) => {
-      console.log("data", data);
       toast({
         title: "Created post successfully 🚀",
         variant: "default",
         duration: 2000,
       });
       setTimeout(() => {
-        router.push(`/community/${community.slug}`);
+        router.push(`/community/${data}`);
         router.refresh();
       }, 1000);
     },
   });
 
   useEffect(() => {
-    const communityDefaults: Option = getCommunityDefaults(community);
-
-    if (communityDefaults) {
-      setCommunitySelect(communityDefaults);
+    if (community) {
+      const communityDefaults: Option = getCommunityDefaults(community);
+      if (communityDefaults) {
+        setCommunitySelect(communityDefaults);
+      }
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -333,7 +333,7 @@ const CreateCommunityPost = ({
               />
             </div>
           </div>
-          <CardFooter className="justify-between space-x-2 py-10">
+          <CardFooter className="justify-between space-x-2 py-6">
             <Button variant="ghost" onClick={() => router.back()}>
               Cancel
             </Button>

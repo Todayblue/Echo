@@ -1,11 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
 import { ContextMenu, ContextMenuTrigger } from "./ui/context-menu";
-import Link from "next/link";
 
-interface AlbumArtworkProps extends React.HTMLAttributes<HTMLDivElement> {
+interface CommuCardProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
   profileImage: string | null;
   aspectRatio?: "portrait" | "square";
@@ -14,7 +14,7 @@ interface AlbumArtworkProps extends React.HTMLAttributes<HTMLDivElement> {
   communitySlug: string | null;
 }
 
-export function AlbumArtwork({
+export function CommuCard({
   name,
   profileImage,
   aspectRatio = "portrait",
@@ -23,7 +23,7 @@ export function AlbumArtwork({
   className,
   communitySlug,
   ...props
-}: AlbumArtworkProps) {
+}: CommuCardProps) {
   return (
     <div className={cn("space-y-3 py-3", className)} {...props}>
       <ContextMenu>

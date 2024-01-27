@@ -25,17 +25,9 @@ const CommunityPostCard: FC<CommunityPostCardProps> = async ({
   communityImage,
   posts,
 }) => {
-  // const memberCount = await prisma.subscription.count({
-  //   where: {
-  //     community: {
-  //       slug: communitySlug,
-  //     },
-  //   },
-  // });
-
   return (
     <div className="rounded-md border ">
-      <div className="px-6 py-4  mx-auto flex items-center space-x-4 border-b">
+      <div className="px-6 py-4 rounded-t-md  mx-auto flex items-center space-x-4 border-b bg-slate-300">
         <Link className="shrink-0" href={`/community/${communitySlug}`}>
           <CommunityAvatar
             communityName={communityName}
@@ -49,10 +41,6 @@ const CommunityPostCard: FC<CommunityPostCardProps> = async ({
               {communityName}
             </h1>
           </Link>
-          {/* <div className="flex flex-row space-x-2 text-gray-500">
-              <p className="text-xl font-medium">{memberCount}</p>
-              <Users className="w-auto h-auto" />
-            </div> */}
           <p className="text-sm text-muted-foreground">
             {communityDescription}
           </p>
@@ -67,12 +55,14 @@ const CommunityPostCard: FC<CommunityPostCardProps> = async ({
           />
         ))}
       </div>
-      <Link
-        className="h-[40px] rounded-b-md grid grid-cols-1 bg-gray-300 hover:bg-gray-200 items-center"
+      {/* <Link
+        className="h-[40px] rounded-b-md grid grid-cols-1  hover:underline items-center"
         href={`/community/${communitySlug}`}
       >
-        <p className="text-center font-medium">see more</p>
-      </Link>
+        <p className="text-center text-base text-gray-700 font-semibold">
+          more
+        </p>
+      </Link> */}
     </div>
   );
 };

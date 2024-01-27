@@ -71,7 +71,7 @@ const PostCard = ({
             <div className="text-gray-900 font-bold text-xl">{title}</div>
 
             {image && (
-              <figure className="flex justify-center pt-4">
+              <figure className="flex justify-center py-4">
                 <Image
                   src={image}
                   alt={`picture of ${author}`}

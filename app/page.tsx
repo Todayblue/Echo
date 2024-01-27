@@ -1,8 +1,12 @@
-import ChooseCommunity from "@/components/ChooseCommunity";
+import { CommuCard } from "@/components/CommuCard";
 import CommunityPostCard from "@/components/CommunityPostCard";
 import CustomFeed from "@/components/homepage/CustomFeed";
 import GeneralFeed from "@/components/homepage/GeneralFeed";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { getAuthSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Home as HomeIcon } from "lucide-react";
@@ -22,53 +26,92 @@ export default async function Home() {
           comments: true,
           author: true,
         },
+        orderBy: {
+          createdAt: "desc",
+        },
       },
     },
   });
 
-  return (
-    <div className="grid mx-auto w-4/5 grid-cols-6 gap-x-6 py-6">
-      <div className="col-span-4 space-y-4">
-        {/* border border-gray-300 bg-white p-4 flex leading-normal rounded-lg */}
-        <div>
-          <ChooseCommunity />
-        </div>
-        <div className="">
-          {communityPosts.map((community) => (
-            <div key={community.id} className="mb-4">
-              {/* Add margin-bottom */}
-              <CommunityPostCard
-                communitySlug={community.slug}
-                communityName={community.name}
-                communityDescription={community.description}
-                communityImage={community.profileImage}
-                posts={community.posts}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+  const communities = await prisma.community.findMany({
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      profileImage: true,
+    },
+  });
 
-      {/* subreddit info */}
-      <div className="col-span-2 space-y-4 overflow-hidden h-fit rounded-lg border border-gray-200 order-first md:order-last ">
-        <div className="bg-emerald-100 px-6 py-4">
-          <p className="font-semibold py-3 flex items-center gap-1.5">
-            <HomeIcon className="h-4 w-4" />
-            Home
-          </p>
-        </div>
-        <dl className="divide-y divide-gray-100 px-6 py-4 text-sm leading-6">
-          <div className="flex justify-between gap-x-4 py-3">
-            <p className="-mt-6 text-zinc-500">
-              Your personal Breadit frontpage. Come here to check in with your
-              favorite communities.
+  return (
+    <div className="bg-white pt-2">
+      <div className="grid mx-auto w-4/5 gap-x-6 py-6 ">
+        <ScrollArea className="w-full h-auto rounded-md border bg-white">
+          <div className="border-b bg-slate-300 px-6 py-3">
+            <p className="tracking-wide text-base text-gray-700 font-semibold">
+              Choose Community
             </p>
           </div>
+          <div className="grid grid-cols-10 place-items-center mx-2 p-2 ">
+            {communities.map((community) => (
+              <CommuCard
+                key={community.id}
+                name={community.name}
+                communitySlug={community.slug}
+                profileImage={community.profileImage}
+                aspectRatio="square"
+                width={60}
+                height={60}
+              />
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
 
-          <Link href={`/community/create`}>
-            <Button>Create Community</Button>
-          </Link>
-        </dl>
+      <div className="grid mx-auto w-4/5 grid-cols-6 gap-x-6 pb-6">
+        <div className="col-span-4 space-y-4">
+          {communityPosts.map(
+            (community) =>
+              community.posts.length > 0 && (
+                <div key={community.id} className="mb-4 ">
+                  <CommunityPostCard
+                    communitySlug={community.slug}
+                    communityName={community.name}
+                    communityDescription={community.description}
+                    communityImage={community.profileImage}
+                    posts={community.posts}
+                  />
+                </div>
+              )
+          )}
+        </div>
+
+        {/* subreddit info */}
+        <div className="col-span-2 flex flex-col space-y-4 ">
+          <div className="w-screen  md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
+            <div className="bg-slate-300 rounded-t-md px-6 py-4 ">
+              <p className="font-semibold py-3 flex items-center gap-1.5">
+                <HomeIcon className="h-4 w-4" />
+                Home
+              </p>
+            </div>
+            <div className="-my-3 divide-y divide-gray-100 grid px-6 py-4 text-sm leading-6 gap-y-2">
+              <p className="text-zinc-500 pt-2">
+                Your personal Breadit frontpage. Come here to check in with your
+                favorite communities.
+              </p>
+              <div className="grid gap-y-2 pt-3 pb-2 ">
+                <Link href={`/community/create`}>
+                  <Button className="bg-slate-400 w-full">
+                    Create Community
+                  </Button>
+                </Link>
+                <Link href={`/post/create`}>
+                  <Button className="bg-slate-400 w-full">Create Post</Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

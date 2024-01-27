@@ -52,8 +52,10 @@ const CreateComment: FC<CreateCommentProps> = ({ postId, replyToId }) => {
   });
 
   return (
-    <div className="grid w-full gap-1.5 border border-gray-300  bg-white p-4 rounded-lg">
-      <Label htmlFor="comment">Your comment</Label>
+    <div className="grid w-full gap-1.5 border border-gray-300  bg-white p-4 rounded-lg ">
+      <Label htmlFor="comment" className="text-xl font-bold text-gray-800">
+        Your comment
+      </Label>
       <div className="mt-2">
         <Textarea
           id="comment"
@@ -63,9 +65,9 @@ const CreateComment: FC<CreateCommentProps> = ({ postId, replyToId }) => {
           placeholder="What are your thoughts?"
         />
 
-        <div className="mt-2 flex justify-end">
+        <div className="mt-3 flex justify-end">
           <Button
-            className="h-6 w-12"
+            className="h-8 px-3 w-16"
             isLoading={isPending}
             disabled={input.length === 0}
             onClick={() => comment({ postId, text: input, replyToId })}

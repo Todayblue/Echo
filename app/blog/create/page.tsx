@@ -5,10 +5,10 @@ import React from "react";
 
 type Props = {};
 
-const page = (props: Props) => {
-  const blogTags = prisma.tag.findMany({});
+const page = async (props: Props) => {
+  const blogTags = await prisma.tag.findMany({});
 
-  return <CreateBlog />;
+  return <CreateBlog blogTags={blogTags} />;
 };
 
 export default page;

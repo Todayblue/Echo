@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return Response.json({ post, communityName: post.community.name });
+    return Response.json({ post, communitySlug: post.community.slug });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(error.message, { status: 400 });

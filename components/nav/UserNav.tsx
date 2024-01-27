@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signIn, signOut } from "next-auth/react";
+import Link from "next/link";
 
 type UserProps = {
   user: {
@@ -71,9 +72,9 @@ export function UserNav({ user }: UserProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          <DropdownMenuItem>Billing</DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <Link href='/feed'>
+            <DropdownMenuItem>Your Feed</DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()}>Log out</DropdownMenuItem>

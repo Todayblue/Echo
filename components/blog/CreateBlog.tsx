@@ -1,7 +1,7 @@
 "use client";
 import React, { SyntheticEvent } from "react";
 import { useEffect, useState } from "react";
-
+import { MultiValue, ActionMeta, OnChangeValue } from "react-select";
 import { useForm } from "react-hook-form";
 
 import { useRouter } from "next/navigation";
@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import Select from "react-tailwindcss-select";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
+import CreatableSelect from "react-select/creatable";
 
 // hooks
 import { useCustomToasts } from "@/hooks/use-custom-toasts";
@@ -29,13 +30,13 @@ import { toast } from "@/hooks/use-toast";
 
 // validator and types
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PostCreationRequest, PostValidator } from "@/lib/validators/post";
 // import { ICommunity } from "@/types/db";
-import { Option } from "react-tailwindcss-select/dist/components/type";
 
 // api
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
+import { TagPayload } from "@/lib/validators/blog/tag";
+import { BlogPayload, BlogValidator } from "@/lib/validators/blog/blog";
 // import CreateCommunityPost from "@/components/community/post/CreateCommunityPost";
 
 interface CloudinaryResource {
@@ -69,21 +70,34 @@ type CommunityDefaultType = {
   name: string;
 };
 
-type Props = {};
+type Props = {
+  blogTags: {
+    id: number;
+    slug: string | null;
+    name: string;
+    authorId: string;
+  }[];
+};
+type Option = {
+  label: string;
+  value: string;
+};
 
-const CreateBlog = (props: Props) => {
+const CreateBlog = ({ blogTags }: Props) => {
   const router = useRouter();
   const { loginToast } = useCustomToasts();
   const [communitySelect, setCommunitySelect] = useState<Option | null>(null);
   const [fileURL, setFileURL] = useState<string | undefined>();
   const [file, setFile] = useState<File | undefined>();
   const [sneakers, setSneakers] = useState<Array<CloudinaryResource>>();
+  const [selectValue, setSelectValue] = useState<Option[] | null>();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<PostCreationRequest>({
-    resolver: zodResolver(PostValidator),
+  const form = useForm<BlogPayload>({
+    resolver: zodResolver(BlogValidator),
   });
 
-  const createSubCommuPost = async (payload: PostCreationRequest) => {
+  const createSubCommuPost = async (payload: BlogPayload) => {
     const imageUrl = await handleImageSubmit();
     const payloadWithImage = { ...payload, imageUrl };
     const { data } = await axios.post(
@@ -94,73 +108,54 @@ const CreateBlog = (props: Props) => {
     return data;
   };
 
-  const { mutate: createCommunityPost, isPending } = useMutation({
-    mutationFn: async (values: PostCreationRequest) =>
-      createSubCommuPost(values),
-    onError: (err) => {
-      if (err instanceof AxiosError) {
-        if (err.response?.status === 403) {
-          return toast({
-            title: "You are not subscribed to this community",
-            description: "Please subscribe to Community.",
-            variant: "destructive",
-          });
-        }
+  const options: Option[] = blogTags.map((tag) => ({
+    value: tag.id.toString(),
+    label: tag.name,
+    __isNew__: false,
+  }));
 
-        if (err.response?.status === 422) {
-          return toast({
-            title: "Invalid community name.",
-            description: "Please choose a name between 3 and 21 letters.",
-            variant: "destructive",
-          });
-        }
-
-        if (err.response?.status === 401) {
-          return loginToast();
-        }
+  const handleTagData = () => {
+    selectValue?.forEach((option: any) => {
+      if (option.__isNew__) {
+        createTag(option);
       }
+    });
+  };
 
-      toast({
-        title: "There was an error.",
-        description: "Could not create sub community.",
-        variant: "destructive",
-      });
-    },
-    onSuccess: (data) => {
-      console.log("data", data);
-      toast({
-        title: "Created post successfully 🚀",
-        variant: "default",
-        duration: 2000,
-      });
-      setTimeout(() => {
-        //  router.push(`/community/${community.slug}`);
-        router.refresh();
-      }, 1000);
+  const createBlogPost = async (payload: BlogPayload) => {
+    const imageUrl = await handleImageSubmit();
+    payload.coverImage = imageUrl;
+    // await createTag();
+    handleTagData();
+    const { data } = await axios.post("/api/blog", payload);
+
+    return data;
+  };
+
+  const { mutate: createBlog, isPending } = useMutation({
+    mutationFn: async (values: BlogPayload) => createBlogPost(values),
+  });
+
+  const { mutate: createTag } = useMutation({
+    mutationFn: async (option: any) => {
+      const payload: TagPayload = {
+        name: option.label,
+      };
+      const { data } = await axios.post("/api/blog/tag", payload);
+      return data;
     },
   });
 
-  const handleSelectChange = (selectOptions: Option | Option[] | null) => {
-    // Assuming setCommunitySelect is a state-setting function
-    setCommunitySelect((prevValue) => {
-      // You may want to adjust this logic based on your requirements
-      if (Array.isArray(selectOptions)) {
-        // Handle the case when selectOptions is an array (Option[])
-        return selectOptions[0]; // or selectOptions[0]?.value if you want the value property
-      } else {
-        // Handle the case when selectOptions is a single option or null
-        return selectOptions;
+  const handleSelectChange = (selectOptions: any) => {
+    setSelectValue(selectOptions);
+    selectOptions.forEach((option: any) => {
+      if (option.__isNew__) {
+        setIsLoading(true);
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 1000);
       }
     });
-
-    if (selectOptions) {
-      form.setValue(
-        "communityId",
-        Array.isArray(selectOptions)
-          ? selectOptions[0].value
-          : selectOptions.value
-      );
-    }
   };
 
   async function handleImageSubmit() {
@@ -190,17 +185,18 @@ const CreateBlog = (props: Props) => {
     const uploadedFile = e.target.files?.[0];
 
     if (uploadedFile) {
+      form.setValue("coverImage", "");
       setFile(uploadedFile);
       setFileURL(URL.createObjectURL(uploadedFile));
     }
   };
 
-  const onSubmit = async (data: PostCreationRequest) => {
-    await createCommunityPost(data);
+  const onSubmit = async (data: BlogPayload) => {
+    console.log("data", data);
   };
   return (
     <Form {...form}>
-      <form className="space-y-8 ">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
         <div className="grid  w-2/4 mx-auto px-4 ">
           <div className="grid gap-6 pt-5">
             <div className="grid gap-2">
@@ -220,25 +216,14 @@ const CreateBlog = (props: Props) => {
             </div>
             <div className="grid gap-2">
               <Label>Tag</Label>
-              <FormField
-                control={form.control}
-                name="communityId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      {/* <Select
-                        {...field}
-                        isClearable
-                        isSearchable
-                        primaryColor={"blue"}
-                        value={communitySelect}
-                        onChange={handleSelectChange}
-                        options={options}
-                      /> */}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <CreatableSelect
+                isClearable
+                isMulti
+                isDisabled={isLoading}
+                isLoading={isLoading}
+                onChange={handleSelectChange}
+                options={options}
+                value={selectValue}
               />
             </div>
             <div className="col-span-full">
@@ -260,8 +245,8 @@ const CreateBlog = (props: Props) => {
                           <Image
                             src={fileURL}
                             alt="Preview"
-                            width={544}
-                            height={306}
+                            width={426}
+                            height={240}
                           />
                         </div>
                       ) : (
@@ -270,12 +255,23 @@ const CreateBlog = (props: Props) => {
                           aria-hidden="true"
                         />
                       )}
-                      <input
-                        id="coverImage"
+                      <FormField
+                        control={form.control}
                         name="coverImage"
-                        type="file"
-                        className="sr-only"
-                        onChange={onImageUpload}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                id="coverImage"
+                                name="coverImage"
+                                type="file"
+                                className="sr-only"
+                                onChange={onImageUpload}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
                       <span>Upload a file</span>
                     </label>
@@ -307,7 +303,9 @@ const CreateBlog = (props: Props) => {
             <Button variant="ghost" onClick={() => router.back()}>
               Cancel
             </Button>
-            <Button type="submit">Create Post</Button>
+            <Button isLoading={isPending} type="submit">
+              Create Post
+            </Button>
           </CardFooter>
         </div>
       </form>
