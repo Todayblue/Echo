@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic";
 import SubscribeLeaveToggle from "@/components/SubscribeLeaveToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -11,8 +10,11 @@ import { notFound } from "next/navigation";
 import RuleList from "@/components/community/rule/RuleList";
 import AboutCommunity from "@/components/community/comment/AboutCommunity";
 import CommunityAvatar from "@/components/community/CommunityAvatar";
-import CommunityAvatarUpload from "@/components/community/CommunityAvatarUpload";
-import PostsFeed from "@/components/PostsFeed";
+const PostsFeed = dynamic(() => import("@/components/PostsFeed"), {
+  ssr: false,
+});
+// import PostsFeed from "@/components/PostsFeed";
+import dynamic from "next/dynamic";
 
 type communityOption = {
   page?: number;
@@ -115,7 +117,7 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
       </div>
 
       {/* content */}
-      <div className="grid  min-h-screen  bg-gray-200">
+      <div className="grid  min-h-screen bg-secondary">
         <div className="grid  mx-auto w-4/5 grid-cols-6 gap-x-6 py-6">
           {/* <ToFeedButton /> */}
 

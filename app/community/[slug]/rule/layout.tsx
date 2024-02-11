@@ -49,7 +49,7 @@ export default async function Layout({
   });
 
   return (
-    <div className="grid  min-h-screen  bg-gray-300 ">
+    <div className="grid  min-h-screen  bg-secondary ">
       <div className="py-16 mx-24 ">
         <div className="grid place-content-center lg:grid-cols-6  gap-6 md:grid-cols-1 ">
           {/* <ToFeedButton /> */}
@@ -64,13 +64,6 @@ export default async function Layout({
               slug={community.slug}
               createdAt={community.createdAt}
               creatorId={community.creatorId}
-            />
-            <RuleList
-              session={session}
-              communityCreatorId={community.creatorId}
-              communitySlug={community.slug}
-              communityName={community.name}
-              rules={rules}
             />
           </div>
         </div>

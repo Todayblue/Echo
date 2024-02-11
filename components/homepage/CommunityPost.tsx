@@ -25,7 +25,7 @@ const CommunityPost = async ({ communitySlug, post }: CommunityPostProps) => {
   return (
     <div className="grid gap-y-1 px-6 py-3 ">
       <Link href={`community/${communitySlug}/post/${post.id}`}>
-        <p className="text-gray-800 font-bold text-md">{post.title}</p>
+        <p className="hover:underline font-bold text-md">{post.title}</p>
       </Link>
       <div className="flex flex-row justify-between text-sm text-gray-400 items-center gap-x-2">
         <div className="flex flex-row space-x-2">

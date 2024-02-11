@@ -14,12 +14,9 @@ const Page = async () => {
   if (!communities) return <div>loading state</div>;
 
   return (
-    <div className="grid  min-h-screen  bg-gray-300 ">
+    <div className="grid min-h-screen ">
       <div className="grid place-content-center items-center gap-6 p-8">
-        <div className="bg-white rounded-md ">
-          <CardHeader className="font-semibold mx-4 border-b border-gray-300">
-            <CardTitle>Create Post</CardTitle>
-          </CardHeader>
+        <div className="bg-white rounded-md border ">
           <CreateCommunityPost community={null} communities={communities} />
         </div>
       </div>

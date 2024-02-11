@@ -7,22 +7,11 @@ import { MainNav } from "./MainNav";
 import { UserNav } from "./UserNav";
 import SearchBar from "../SearchBar";
 
-const munuBar = [
-  {
-    name: "Blog",
-    link: "http://localhost:3000/blog",
-  },
-  {
-    name: "Forum",
-    link: "http://localhost:3000/forum",
-  },
-];
-
 const NavBar = () => {
   const { data: session } = useSession();
 
   return (
-    <div className="fixed inset-x-0 top-0 bg-white dark:bg-gray-950 z-[10] h-fit border-b border-zinc-300  py-2 ">
+    <div className="fixed inset-x-0 top-0 bg-secondary z-[10] h-fit border-b  py-2 ">
       <div className="flex items-center justify-between h-10  px-8 mx-auto max-w-7xl">
         {/* Logo */}
         <Link href={"/"} className="flex items-center gap-2">

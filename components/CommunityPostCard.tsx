@@ -27,7 +27,7 @@ const CommunityPostCard: FC<CommunityPostCardProps> = async ({
 }) => {
   return (
     <div className="rounded-md border ">
-      <div className="px-6 py-4 rounded-t-md  mx-auto flex items-center space-x-4 border-b bg-slate-300">
+      <div className="bg-secondary px-6 py-4 rounded-t-md  mx-auto flex items-center space-x-4 border-b">
         <Link className="shrink-0" href={`/community/${communitySlug}`}>
           <CommunityAvatar
             communityName={communityName}
@@ -37,11 +37,11 @@ const CommunityPostCard: FC<CommunityPostCardProps> = async ({
         </Link>
         <div className="w-full">
           <Link href={`/community/${communitySlug}`}>
-            <h1 className="text-xl font-semibold hover:underline">
+            <h1 className="text-xl font-semibold hover:underline ">
               {communityName}
             </h1>
           </Link>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-gray-300">
             {communityDescription}
           </p>
         </div>

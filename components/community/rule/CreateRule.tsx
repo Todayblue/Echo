@@ -25,9 +25,7 @@ type CreateRuleProps = {
     id: string;
     slug: string | null;
     name: string;
-    createdAt: Date | null;
-    updatedAt: Date | null;
-    creatorId: string;
+    title: string | null;
   };
 };
 
@@ -82,7 +80,7 @@ export const CreateRule = ({ community }: CreateRuleProps) => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 bg-white rounded-lg"
+        className="space-y-8 bg-white rounded-lg border"
       >
         <div className="mx-auto px-4 ">
           <div className="grid gap-6 pt-5">
@@ -122,7 +120,7 @@ export const CreateRule = ({ community }: CreateRuleProps) => {
             </div>
           </div>
           <CardFooter className="justify-between space-x-2 py-10">
-            <Button variant="ghost" onClick={() => router.back()}>
+            <Button variant={"destructive"} onClick={() => router.back()}>
               Cancel
             </Button>
             <Button isLoading={isPending} type="submit">

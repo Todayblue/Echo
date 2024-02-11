@@ -1,5 +1,7 @@
+import BlogCarousel from "@/components/BlogCarousel";
 import { CommuCard } from "@/components/CommuCard";
 import CommunityPostCard from "@/components/CommunityPostCard";
+import RecentBlogPosts from "@/components/blog/RecentBlogPosts";
 import CustomFeed from "@/components/homepage/CustomFeed";
 import GeneralFeed from "@/components/homepage/GeneralFeed";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -42,12 +44,24 @@ export default async function Home() {
     },
   });
 
+  const blogs = await prisma.blog.findMany({
+    select: {
+      id: true,
+      title: true,
+      coverImage: true,
+    },
+  });
+
   return (
     <div className="bg-white pt-2">
-      <div className="grid mx-auto w-4/5 gap-x-6 py-6 ">
-        <ScrollArea className="w-full h-auto rounded-md border bg-white">
-          <div className="border-b bg-slate-300 px-6 py-3">
-            <p className="tracking-wide text-base text-gray-700 font-semibold">
+      <div className="grid mx-auto w-4/5 gap-6 py-6">
+        <div className=" ">
+          <RecentBlogPosts />
+        </div>
+
+        <ScrollArea className="w-full h-auto rounded-md border bg-white ">
+          <div className="border-b bg-secondary  px-6 py-3">
+            <p className="tracking-wide text-base  font-semibold">
               Choose Community
             </p>
           </div>
@@ -69,28 +83,30 @@ export default async function Home() {
 
       <div className="grid mx-auto w-4/5 grid-cols-6 gap-x-6 pb-6">
         <div className="col-span-4 space-y-4">
-          {communityPosts.map(
-            (community) =>
-              community.posts.length > 0 && (
-                <div key={community.id} className="mb-4 ">
-                  <CommunityPostCard
-                    communitySlug={community.slug}
-                    communityName={community.name}
-                    communityDescription={community.description}
-                    communityImage={community.profileImage}
-                    posts={community.posts}
-                  />
-                </div>
-              )
-          )}
+          <div>
+            {communityPosts.map(
+              (community) =>
+                community.posts.length > 0 && (
+                  <div key={community.id} className="mb-4 ">
+                    <CommunityPostCard
+                      communitySlug={community.slug}
+                      communityName={community.name}
+                      communityDescription={community.description}
+                      communityImage={community.profileImage}
+                      posts={community.posts}
+                    />
+                  </div>
+                )
+            )}
+          </div>
         </div>
 
         {/* subreddit info */}
         <div className="col-span-2 flex flex-col space-y-4 ">
-          <div className="w-screen  md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
-            <div className="bg-slate-300 rounded-t-md px-6 py-4 ">
-              <p className="font-semibold py-3 flex items-center gap-1.5">
-                <HomeIcon className="h-4 w-4" />
+          <div className="w-screen  md:w-full  h-fit rounded-lg border border-gray-300 order-first md:order-last">
+            <div className="bg-secondary rounded-t-md px-6 py-4 ">
+              <p className="font-semibold py-3 flex items-center gap-1.5  ">
+                <HomeIcon className="h-4 w-4 " />
                 Home
               </p>
             </div>
@@ -101,15 +117,20 @@ export default async function Home() {
               </p>
               <div className="grid gap-y-2 pt-3 pb-2 ">
                 <Link href={`/community/create`}>
-                  <Button className="bg-slate-400 w-full">
+                  <Button variant={"outline"} className=" w-full">
                     Create Community
                   </Button>
                 </Link>
                 <Link href={`/post/create`}>
-                  <Button className="bg-slate-400 w-full">Create Post</Button>
+                  <Button variant={"outline"} className="w-full">
+                    Create Post
+                  </Button>
                 </Link>
               </div>
             </div>
+          </div>
+          <div className="w-screen  md:w-full bg-white h-fit  border-gray-300 order-first md:order-last">
+            {/* <BlogCarousel blogs={blogs} /> */}
           </div>
         </div>
       </div>

@@ -99,10 +99,9 @@ const CommunityCreate = () => {
       });
     },
     onSuccess: (data) => {
-      console.log("data", data);
       toast({
-        title: "Created post successfully 🚀",
-        variant: "default",
+        title: "Created Community Successfully",
+        variant: "success",
         duration: 2000,
       });
       setTimeout(() => {
@@ -136,12 +135,18 @@ const CommunityCreate = () => {
   }
 
   const onImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    toast({
+      title: "Created Community Successfully",
+      variant: "success",
+      duration: 2000,
+    });
     const uploadedFile = e.target.files?.[0];
 
     if (uploadedFile) {
       setFile(uploadedFile);
       setFileURL(URL.createObjectURL(uploadedFile));
-      form.setValue("profileImage", "");
+      form.setValue("profileImage", fileURL || "");
+      form.clearErrors("profileImage");
     }
   };
 
@@ -161,7 +166,7 @@ const CommunityCreate = () => {
               <div className="grid gap-2">
                 <label
                   htmlFor="coverImage"
-                  className="grid gap-y-3 col-span-1 "
+                  className="grid gap-y-3 col-span-1  "
                 >
                   <div className="grid place-items-center">
                     <Avatar className="w-24 h-24 ">

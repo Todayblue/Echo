@@ -44,6 +44,7 @@ model Session {
 model User {
   id               String         @id @default(cuid())
   name             String?
+  password         String?
   email            String?        @unique
   emailVerified    DateTime?
   username         String?        @unique
@@ -167,19 +168,20 @@ model Blog {
   id         Int      @id @default(autoincrement())
   createdAt  DateTime @default(now())
   slug       String?  @unique
-  title      String?
-  content    String?
-  coverImage String?
+  title      String
+  content    String
+  coverImage String
   author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId   String
   tags       Tag[]
 }
 
 model Tag {
-  id       Int     @id @default(autoincrement())
-  slug     String? @unique
-  blogs    Blog[]
-  name     String  @unique
-  author   User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId String
+  id        Int      @id @default(autoincrement())
+  slug      String?  @unique
+  blogs     Blog[]
+  createdAt DateTime @default(now())
+  name      String   @unique
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
 }

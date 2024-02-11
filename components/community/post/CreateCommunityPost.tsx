@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 
 // components
-import { CardFooter } from "@/components/ui/card";
+import { CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -120,15 +120,6 @@ const CreateCommunityPost = ({
             variant: "destructive",
           });
         }
-
-        if (err.response?.status === 422) {
-          return toast({
-            title: "Invalid community name.",
-            description: "Please choose a name between 3 and 21 letters.",
-            variant: "destructive",
-          });
-        }
-
         if (err.response?.status === 401) {
           return loginToast();
         }
@@ -136,18 +127,18 @@ const CreateCommunityPost = ({
 
       toast({
         title: "There was an error.",
-        description: "Could not create sub community.",
+        description: "Could not create post",
         variant: "destructive",
       });
     },
     onSuccess: (data) => {
       toast({
-        title: "Created post successfully 🚀",
+        title: "Created Post Successfully",
         variant: "default",
         duration: 2000,
       });
       setTimeout(() => {
-        router.push(`/community/${data}`);
+        router.push(`/community/${data.communitySlug}`);
         router.refresh();
       }, 1000);
     },
@@ -183,12 +174,15 @@ const CreateCommunityPost = ({
     });
 
     if (selectOptions) {
+      form.clearErrors("communityId");
       form.setValue(
         "communityId",
         Array.isArray(selectOptions)
           ? selectOptions[0].value
           : selectOptions.value
       );
+    } else {
+      form.resetField("communityId", { keepDirty: true });
     }
   };
 
@@ -231,7 +225,10 @@ const CreateCommunityPost = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
-        <div className="mx-auto px-4 ">
+        <div className="mx-auto px-4">
+          <CardHeader className="font-semibold border-b border-gray-300">
+            <CardTitle>Create Post</CardTitle>
+          </CardHeader>
           <div className="grid gap-6 pt-5">
             <div className="grid gap-2">
               <Label>Community</Label>

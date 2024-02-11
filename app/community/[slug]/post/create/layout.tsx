@@ -66,7 +66,7 @@ export default async function Layout({
   });
 
   return (
-    <div className="grid  min-h-screen  bg-gray-300 ">
+    <div className="grid  min-h-screen bg-secondary">
       <div className="py-16 mx-24 ">
         <div className="grid place-content-center lg:grid-cols-6  gap-6 md:grid-cols-1 ">
           {/* <ToFeedButton /> */}

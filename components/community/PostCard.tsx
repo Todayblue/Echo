@@ -41,11 +41,6 @@ const PostCard = ({
     ""
   );
   const pRef = useRef<HTMLParagraphElement>(null);
-  const [isLongContent, setIsLongContent] = useState(false);
-
-  useEffect(() => {
-    pRef.current?.clientHeight === 160 && setIsLongContent(true);
-  }, []);
 
   return (
     <div className=" w-full">
@@ -93,7 +88,7 @@ const PostCard = ({
                 />
               ) : null}
               {/* h-40 = 160px */}
-              {isLongContent ? (
+              {pRef.current?.clientHeight === 160 ? (
                 // blur bottom if content is too long
                 <div className="absolute bottom-0 left-0 h-24 w-full bg-gradient-to-t from-white to-transparent"></div>
               ) : null}

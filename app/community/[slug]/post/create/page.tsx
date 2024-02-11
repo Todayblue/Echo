@@ -20,11 +20,7 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
   if (!community || !community) return <div>loading state</div>;
 
   return (
-    <div className="bg-white rounded-lg">
-      <CardHeader className="font-semibold mx-4 border-b border-gray-300">
-        <CardTitle>Create Post</CardTitle>
-      </CardHeader>
-
+    <div className="bg-white rounded-lg border">
       <CreateCommunityPost community={community} communities={communities} />
     </div>
   );

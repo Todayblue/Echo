@@ -60,7 +60,7 @@ const Page = async ({ params: { id } }: { params: { id: string } }) => {
   }
 
   return (
-    <div className="grid  min-h-screen  ">
+    <div className="grid  min-h-screen bg-secondary">
       <div className="py-12 mx-24 ">
         <div className="grid place-content-center lg:grid-cols-6  gap-6 md:grid-cols-1 ">
           {/* <ToFeedButton /> */}

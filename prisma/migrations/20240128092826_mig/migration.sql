@@ -59,8 +59,10 @@ CREATE TABLE "Community" (
     "id" TEXT NOT NULL,
     "slug" TEXT,
     "name" TEXT NOT NULL,
+    "title" TEXT,
     "description" TEXT,
     "profileImage" TEXT,
+    "coverImage" TEXT,
     "createdAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
     "creatorId" TEXT NOT NULL,
@@ -134,6 +136,36 @@ CREATE TABLE "CommentVote" (
     CONSTRAINT "CommentVote_pkey" PRIMARY KEY ("userId","commentId")
 );
 
+-- CreateTable
+CREATE TABLE "Blog" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "slug" TEXT,
+    "title" TEXT,
+    "content" TEXT,
+    "coverImage" TEXT,
+    "authorId" TEXT NOT NULL,
+
+    CONSTRAINT "Blog_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Tag" (
+    "id" SERIAL NOT NULL,
+    "slug" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "name" TEXT NOT NULL,
+    "authorId" TEXT NOT NULL,
+
+    CONSTRAINT "Tag_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "_BlogToTag" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provider", "providerAccountId");
 
@@ -157,6 +189,21 @@ CREATE INDEX "Community_name_idx" ON "Community"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Subscription_name_key" ON "Subscription"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Blog_slug_key" ON "Blog"("slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Tag_slug_key" ON "Tag"("slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Tag_name_key" ON "Tag"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_BlogToTag_AB_unique" ON "_BlogToTag"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_BlogToTag_B_index" ON "_BlogToTag"("B");
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -208,3 +255,15 @@ ALTER TABLE "CommentVote" ADD CONSTRAINT "CommentVote_commentId_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "CommentVote" ADD CONSTRAINT "CommentVote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Blog" ADD CONSTRAINT "Blog_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Tag" ADD CONSTRAINT "Tag_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_BlogToTag" ADD CONSTRAINT "_BlogToTag_A_fkey" FOREIGN KEY ("A") REFERENCES "Blog"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_BlogToTag" ADD CONSTRAINT "_BlogToTag_B_fkey" FOREIGN KEY ("B") REFERENCES "Tag"("id") ON DELETE CASCADE ON UPDATE CASCADE;

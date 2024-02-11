@@ -37,6 +37,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { TagPayload } from "@/lib/validators/blog/tag";
 import { BlogPayload, BlogValidator } from "@/lib/validators/blog/blog";
+import { generateSlug } from "@/lib/slugtify";
 // import CreateCommunityPost from "@/components/community/post/CreateCommunityPost";
 
 interface CloudinaryResource {
@@ -81,12 +82,13 @@ type Props = {
 type Option = {
   label: string;
   value: string;
+  __isNew__: boolean;
 };
 
 const CreateBlog = ({ blogTags }: Props) => {
   const router = useRouter();
   const { loginToast } = useCustomToasts();
-  const [communitySelect, setCommunitySelect] = useState<Option | null>(null);
+  const [tagIds, setTagIds] = useState<String[]>([]);
   const [fileURL, setFileURL] = useState<string | undefined>();
   const [file, setFile] = useState<File | undefined>();
   const [sneakers, setSneakers] = useState<Array<CloudinaryResource>>();
@@ -117,7 +119,10 @@ const CreateBlog = ({ blogTags }: Props) => {
   const handleTagData = () => {
     selectValue?.forEach((option: any) => {
       if (option.__isNew__) {
-        createTag(option);
+        let payload: TagPayload = {
+          name: option.label,
+        };
+        createTag(payload);
       }
     });
   };
@@ -125,35 +130,55 @@ const CreateBlog = ({ blogTags }: Props) => {
   const createBlogPost = async (payload: BlogPayload) => {
     const imageUrl = await handleImageSubmit();
     payload.coverImage = imageUrl;
-    // await createTag();
-    handleTagData();
-    const { data } = await axios.post("/api/blog", payload);
+    if (selectValue) {
+      let slugs = selectValue.map((s) => generateSlug(s.label));
+      payload.tagSlugs = slugs;
+    }
+    await handleTagData();
 
+    const { data } = await axios.post("/api/blog", payload);
     return data;
+  };
+
+  const createTagData = async (payload: TagPayload) => {
+    const { data } = await axios.post("/api/blog/tag", payload);
+    return data.tag;
   };
 
   const { mutate: createBlog, isPending } = useMutation({
     mutationFn: async (values: BlogPayload) => createBlogPost(values),
-  });
-
-  const { mutate: createTag } = useMutation({
-    mutationFn: async (option: any) => {
-      const payload: TagPayload = {
-        name: option.label,
-      };
-      const { data } = await axios.post("/api/blog/tag", payload);
-      return data;
+    onError: (err) => {
+      toast({
+        title: "There was an error.",
+        description: "Could not create BlogPost",
+        variant: "destructive",
+      });
+    },
+    onSuccess: (data) => {
+      console.log("data", data);
+      toast({
+        title: "Created blog successfully 🚀",
+        variant: "default",
+        duration: 2000,
+      });
     },
   });
 
+  const { mutate: createTag } = useMutation({
+    mutationFn: async (values: TagPayload) => createTagData(values),
+  });
+
   const handleSelectChange = (selectOptions: any) => {
+    form.setValue("tagSlugs", []);
     setSelectValue(selectOptions);
+
     selectOptions.forEach((option: any) => {
       if (option.__isNew__) {
         setIsLoading(true);
         setTimeout(() => {
           setIsLoading(false);
         }, 1000);
+      } else {
       }
     });
   };
@@ -192,7 +217,7 @@ const CreateBlog = ({ blogTags }: Props) => {
   };
 
   const onSubmit = async (data: BlogPayload) => {
-    console.log("data", data);
+    createBlog(data);
   };
   return (
     <Form {...form}>
