@@ -1,17 +1,17 @@
 import BlogCarousel from "@/components/BlogCarousel";
-import { CommuCard } from "@/components/CommuCard";
+import {CommuCard} from "@/components/CommuCard";
 import CommunityPostCard from "@/components/CommunityPostCard";
 import RecentBlogPosts from "@/components/blog/RecentBlogPosts";
 import CustomFeed from "@/components/homepage/CustomFeed";
 import GeneralFeed from "@/components/homepage/GeneralFeed";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { getAuthSession } from "@/lib/auth";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {Button, buttonVariants} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {ScrollArea} from "@/components/ui/scroll-area";
+import {Separator} from "@/components/ui/separator";
+import {getAuthSession} from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { Home as HomeIcon } from "lucide-react";
+import {Home as HomeIcon} from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -55,9 +55,9 @@ export default async function Home() {
   return (
     <div className="bg-white pt-2">
       <div className="grid mx-auto w-4/5 gap-6 py-6">
-        <div className=" ">
+        {/* <div className=" ">
           <RecentBlogPosts />
-        </div>
+        </div> */}
 
         <ScrollArea className="w-full h-auto rounded-md border bg-white ">
           <div className="border-b bg-secondary  px-6 py-3">

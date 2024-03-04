@@ -1,5 +1,4 @@
 "use client";
-import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,39 +11,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "@prisma/client";
-import { signIn, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
-import { createAvatar } from "@dicebear/core";
-import { botttsNeutral } from "@dicebear/collection";
 
 type UserProps = {
   user: User | null;
 };
 
 export function UserNav({ user }: UserProps) {
-  const userName = user?.username || user?.name || "";
-
-  const avatar = useMemo(() => {
-    return createAvatar(botttsNeutral, {
-      backgroundColor: ["43a047", "00acc1", "3949ab", "d81b60"],
-      seed: userName,
-      size: 128,
-      eyes: ["bulging", "dizzy", "eva", "glow", "frame2", "frame1", "happy"],
-      mouth: [
-        "bite",
-        "diagram",
-        "grill01",
-        "grill02",
-        "grill03",
-        "smile01",
-        "smile02",
-        "square01",
-        "square02",
-      ],
-      // ... other options
-    }).toDataUriSync();
-  }, [userName]);
-
   if (!user) {
     return (
       <Button variant={"outline"} size={"sm"}>
@@ -59,8 +33,8 @@ export function UserNav({ user }: UserProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-9 w-9 rounded-full">
             <Avatar className="h-9 w-9">
-              <AvatarImage src={user.image || avatar} />
-              <AvatarFallback>{userName}</AvatarFallback>
+              <AvatarImage src={user.image || ""} />
+              <AvatarFallback>{user.username}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
@@ -75,7 +49,9 @@ export function UserNav({ user }: UserProps) {
           <>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{userName}</p>
+                <p className="text-sm font-medium leading-none">
+                  {user.username}
+                </p>
                 <p className="text-xs leading-none text-muted-foreground">
                   {user.email}
                 </p>
@@ -86,8 +62,8 @@ export function UserNav({ user }: UserProps) {
               <Link href="/blog/tag/all">
                 <DropdownMenuItem>Blog</DropdownMenuItem>
               </Link>
-              <Link href="/feed">
-                <DropdownMenuItem>Your Feed</DropdownMenuItem>
+              <Link href={`/user/${user.username}`}>
+                <DropdownMenuItem>Profile</DropdownMenuItem>
               </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

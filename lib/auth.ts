@@ -45,10 +45,20 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Generate avatar image URL
+        const avatarUrl = `https://www.gravatar.com/avatar/${Math.random().toString(36).substring(7)}?d=identicon&r=PG`;
+
+        // Update user profile with the generated avatar URL
+        const updatedUser = await prisma.user.update({
+          where: { id: existingUser.id },
+          data: { image: avatarUrl },
+        });
+
         return {
-          id: existingUser.id,
-          email: existingUser.email,
-          username: existingUser.username,
+          id: updatedUser.id,
+          email: updatedUser.email,
+          username: updatedUser.username,
+          image: updatedUser.image,
         };
       },
     }),
@@ -68,6 +78,18 @@ export const authOptions: NextAuthOptions = {
       if (!dbUser) {
         token.id = user!.id;
         return token;
+      }
+
+      if (!dbUser.username) {
+        const username = `${dbUser.email?.split("@")[0]}_${Math.random().toString(36).substring(7)}`;
+        await prisma.user.update({
+          data: {
+            username: username,
+          },
+          where: {
+            id: dbUser.id,
+          },
+        });
       }
 
       return {
