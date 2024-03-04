@@ -16,6 +16,12 @@ export default async function Page({
     where: {
       slug: slug,
     },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      title: true,
+    },
   });
 
   if (!community) return <div>loading state</div>;

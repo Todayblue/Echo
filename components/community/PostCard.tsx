@@ -12,10 +12,11 @@ type PartialVote = Pick<Vote, "type">;
 
 type PostCardProps = {
   id: string;
+  slug: string | null;
   commu?: string;
   author: string | null;
   title: string;
-  image?: string;
+  image: string | null;
   content: string | null;
   createdAt: Date;
 
@@ -26,6 +27,7 @@ type PostCardProps = {
 const PostCard = ({
   id,
   commu,
+  slug,
   author,
   title,
   image,
@@ -39,13 +41,6 @@ const PostCard = ({
     ""
   );
   const pRef = useRef<HTMLParagraphElement>(null);
-  const [isLongContent, setIsLongContent] = useState(false);
-
-  // console.log(createdAt as Date);
-
-  useEffect(() => {
-    pRef.current?.clientHeight === 160 && setIsLongContent(true);
-  }, []);
 
   return (
     <div className=" w-full">
@@ -58,7 +53,7 @@ const PostCard = ({
         <div className="mb-4">
           <div className="flex items-center">
             <h1 className="hover:underline">
-              <Link href={`/community/${commu}`}>c/{commu}</Link>
+              <Link href={`/community/${slug}`}>c/{commu}</Link>
             </h1>
             <Dot size={20} className="text-gray-500" />
             <div className="text-sm text-gray-400 flex items-center gap-x-2">
@@ -66,37 +61,39 @@ const PostCard = ({
               <p>{formatTimeToNow(new Date(createdAt))}</p>
             </div>
           </div>
-          <div className="text-gray-900 font-bold text-xl">{title}</div>
 
-          {image && (
-            <figure className="flex justify-center pt-4">
-              <Image
-                src={image}
-                alt={`picture of ${author}`}
-                width={500}
-                height={500}
-                className="m-h-[512px]"
-              />
-            </figure>
-          )}
+          <Link href={`/community/${slug}/post/${id}`}>
+            <div className="text-gray-900 font-bold text-xl">{title}</div>
 
-          <div
-            className="relative text-sm max-h-40 w-full overflow-clip"
-            ref={pRef}
-          >
-            {cleanContent ? (
-              <div
-                className="text-gray-700"
-                dangerouslySetInnerHTML={{ __html: cleanContent }}
-              />
-            ) : null}
-
-            {/* h-40 = 160px */}
-            {isLongContent ? (
-              // blur bottom if content is too long
-              <div className="absolute bottom-0 left-0 h-24 w-full bg-gradient-to-t from-white to-transparent"></div>
-            ) : null}
-          </div>
+            {image && (
+              <figure className="flex justify-center py-4">
+                <Image
+                  src={image}
+                  alt={`picture of ${author}`}
+                  width={500}
+                  height={500}
+                  className="m-h-[512px]"
+                  priority={true}
+                />
+              </figure>
+            )}
+            <div
+              className="relative text-sm max-h-40 w-full overflow-clip"
+              ref={pRef}
+            >
+              {cleanContent ? (
+                <div
+                  className="text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: cleanContent }}
+                />
+              ) : null}
+              {/* h-40 = 160px */}
+              {pRef.current?.clientHeight === 160 ? (
+                // blur bottom if content is too long
+                <div className="absolute bottom-0 left-0 h-24 w-full bg-gradient-to-t from-white to-transparent"></div>
+              ) : null}
+            </div>
+          </Link>
         </div>
       </div>
     </div>

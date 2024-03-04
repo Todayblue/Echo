@@ -1,9 +1,10 @@
 import { z } from "zod";
 
 export const PostValidator = z.object({
-  communityId: z.string({ required_error: "Community is required" }),
+  communityId: z.string({ required_error: "Please select community" }),
+  imageUrl: z.string().optional(),
   title: z
-    .string({ required_error: "Title is required" })
+    .string({ required_error: "Please fill in post title" })
     .min(3, {
       message: "Title must be at least 3 characters long",
     })

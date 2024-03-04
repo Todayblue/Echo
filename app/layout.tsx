@@ -7,6 +7,7 @@ import { NextAuthProvider } from "@/components/NextAuthProvider";
 import QueryProvider from "@/components/QueryProvider";
 import { Toaster } from "@/components/ui/toaster";
 import NavBar from "@/components/nav/NavBar";
+import { cn } from "@/lib/utils";
 
 const lato = Lato({
   weight: "400",
@@ -24,8 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={lato.className}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(
+        "bg-white text-slate-900 antialiased light",
+        lato.className
+      )}
+    >
+      <body className="min-h-screen pt-12 bg-slate-50 antialiased">
         <QueryProvider>
           <NextAuthProvider>
             <ThemeProvider
@@ -34,10 +42,8 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <div className="pb-10">
-                <NavBar />
-              </div>
-              {children}
+              <NavBar />
+              <div className="w-full h-screen">{children}</div>
             </ThemeProvider>
           </NextAuthProvider>
         </QueryProvider>

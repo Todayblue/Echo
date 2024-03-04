@@ -30,11 +30,11 @@ const getPostsWhereClause = async (
   if (community) {
     whereClause = {
       community: {
-        name: community,
+        slug: community,
       },
     };
   } else if (session) {
-    const followedCommunitiesIds = await prisma.subscription
+    const followedcommunityIds = await prisma.subscription
       .findMany({
         where: {
           userId: session.user.id,
@@ -48,7 +48,7 @@ const getPostsWhereClause = async (
     whereClause = {
       community: {
         id: {
-          in: followedCommunitiesIds,
+          in: followedcommunityIds,
         },
       },
     };
@@ -63,8 +63,6 @@ export async function GET(req: Request) {
   const whereClause = await getPostsWhereClause(session, params.community);
 
   const posts = await prisma.post.findMany({
-    take: parseInt(params.limit),
-    skip: (parseInt(params.page) - 1) * parseInt(params.limit), // skip should start from 0 for page 1
     orderBy: {
       createdAt: "desc",
     },

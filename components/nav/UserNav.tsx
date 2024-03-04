@@ -1,3 +1,4 @@
+"use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,74 +10,68 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { signIn, signOut } from "next-auth/react";
+import { User } from "@prisma/client";
+import { signOut } from "next-auth/react";
+import Link from "next/link";
 
 type UserProps = {
-  user: {
-    name: string;
-    email: string;
-    image: string;
-  };
-};
-
-type UserName = {
-  firstName: string;
-  lastName: string;
-};
-
-const splitName = (name = "") => {
-  const [firstName, ...lastName] = name.split(" ");
-  const fName = firstName.split("");
-  const lName = lastName.join(" ").split("");
-  return {
-    firstName: fName[0],
-    lastName: lName[0],
-  };
+  user: User | null;
 };
 
 export function UserNav({ user }: UserProps) {
   if (!user) {
     return (
-      <Button variant="outline" onClick={() => signIn("google")}>
-        Sign in
+      <Button variant={"outline"} size={"sm"}>
+        <Link href="/user/sign-in">Sign in</Link>
       </Button>
     );
   }
 
-  const userName: UserName = splitName(user.name);
-
   return (
     <DropdownMenu>
-      {user && (
+      {user ? (
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-9 w-9 rounded-full">
             <Avatar className="h-9 w-9">
-              <AvatarImage src={user.image} alt="@shadcn" />
-              <AvatarFallback>{`${userName.firstName} ${userName.lastName}`}</AvatarFallback>
+              <AvatarImage src={user.image || ""} />
+              <AvatarFallback>{user.username}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
+      ) : (
+        <Button variant="default" size="sm">
+          <Link href="/user/sign-in">Sign in</Link>
+        </Button>
       )}
 
       <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          {user && (
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{user.name}</p>
-              <p className="text-xs leading-none text-muted-foreground">
-                {user.email}
-              </p>
-            </div>
-          )}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          <DropdownMenuItem>Billing</DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut()}>Log out</DropdownMenuItem>
+        {user && (
+          <>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  {user.username}
+                </p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user.email}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <Link href="/blog/tag/all">
+                <DropdownMenuItem>Blog</DropdownMenuItem>
+              </Link>
+              <Link href={`/user/${user.username}`}>
+                <DropdownMenuItem>Profile</DropdownMenuItem>
+              </Link>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => signOut()}>
+              Log out
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

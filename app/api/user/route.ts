@@ -1,5 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import bcrypt from "bcrypt";
+import { CreateUserValidator } from "@/lib/validators/user";
 
 
 export async function GET() {
@@ -18,15 +20,48 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { name } = await request.json();
 
-    const user = await prisma.user.create({
-      data: {
-        name,
+    const body = await request.json();
+    const { email, username, password } = CreateUserValidator.parse(body);
+
+
+    const existingUserByEmail = await prisma.user.findUnique({
+      where: {
+        email: email,
+      }
+    })
+    const existingUserByUserName = await prisma.user.findUnique({
+      where: {
+        username: username,
       },
     });
+    if (existingUserByEmail) {
+      return NextResponse.json({ user: existingUserByEmail, message: 'User with this email already exists' },{status: 409});
+    }
+    if (existingUserByUserName) {
+      return NextResponse.json(
+        {
+          user: existingUserByUserName,
+          message: "User with this username already exists",
+        },
+        { status: 409 }
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        email,
+        password: hashedPassword,
+      },
+    });
+
+    const {password: newUserPassword, ...rest}= newUser
+
     return NextResponse.json(
-      { message: "Create User successfully", user },
+      { message: "Create User Successfully", user: rest },
       { status: 200 }
     );
   } catch (error) {

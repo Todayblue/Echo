@@ -44,6 +44,7 @@ model Session {
 model User {
   id               String         @id @default(cuid())
   name             String?
+  password         String?
   email            String?        @unique
   emailVerified    DateTime?
   username         String?        @unique
@@ -59,19 +60,25 @@ model User {
   votes            Vote[]
   rule             Rule[]
   Session          Session[]
+  Blog             Blog[]
+  Tag              Tag[]
 }
 
 model Community {
-  id          String         @id @default(cuid())
-  slug        String?
-  name        String         @unique
-  createdAt   DateTime?      @default(now())
-  updatedAt   DateTime?      @updatedAt
-  creatorId   String
-  posts       Post[]
-  creator     User?          @relation("CreatedBy", fields: [creatorId], references: [id])
-  subscribers Subscription[]
-  rule        Rule[]
+  id           String         @id @default(cuid())
+  slug         String?
+  name         String         @unique
+  title        String?
+  description  String?
+  profileImage String?
+  coverImage   String?
+  createdAt    DateTime?      @default(now())
+  updatedAt    DateTime?      @updatedAt
+  creatorId    String
+  posts        Post[]
+  creator      User?          @relation("CreatedBy", fields: [creatorId], references: [id])
+  subscribers  Subscription[]
+  rule         Rule[]
 
   @@index([name])
 }
@@ -91,6 +98,7 @@ model Post {
   slug        String?
   title       String
   content     String?
+  imageUrl    String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   authorId    String
@@ -154,4 +162,26 @@ enum Role {
 enum VoteType {
   UP
   DOWN
+}
+
+model Blog {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  slug       String?  @unique
+  title      String
+  content    String
+  coverImage String
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId   String
+  tags       Tag[]
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  slug      String?  @unique
+  blogs     Blog[]
+  createdAt DateTime @default(now())
+  name      String   @unique
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
 }

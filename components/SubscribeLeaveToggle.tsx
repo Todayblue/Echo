@@ -31,7 +31,7 @@ const SubscribeLeaveToggle = ({
         communityId,
       };
 
-      const { data } = await axios.post("/api/communities/subscribe", payload);
+      const { data } = await axios.post("/api/community/subscribe", payload);
       return data as string;
     },
     onError: (err) => {
@@ -66,10 +66,7 @@ const SubscribeLeaveToggle = ({
         communityId,
       };
 
-      const { data } = await axios.post(
-        "/api/communities/unsubscribe",
-        payload
-      );
+      const { data } = await axios.post("/api/community/unsubscribe", payload);
       return data as string;
     },
     onError: (err: AxiosError) => {
@@ -94,7 +91,7 @@ const SubscribeLeaveToggle = ({
 
   return isSubscribed ? (
     <Button
-      className="mt-1 mb-4 rounded-3xl w-20 h-8 "
+      className="mt-5 mb-4 rounded-3xl w-20 h-8 "
       variant="default"
       isLoading={isUnsubLoading}
       onClick={() => unsubscribe()}
@@ -103,7 +100,7 @@ const SubscribeLeaveToggle = ({
     </Button>
   ) : (
     <Button
-      className="mt-1 mb-4 rounded-3xl w-20 h-8 "
+      className="mt-5 mb-4 rounded-3xl w-20 h-8 "
       variant="default"
       isLoading={isSubLoading}
       onClick={() => subscribe()}

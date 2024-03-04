@@ -1,35 +1,20 @@
-import PostsFeed from "@/components/PostsFeed";
 import SubscribeLeaveToggle from "@/components/SubscribeLeaveToggle";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import CommuAvatar from "@/components/community/CommuAvatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LIMIT_POST } from "@/lib/constants";
 import { getAuthSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { format } from "date-fns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Pencil, Trash } from "lucide-react";
 import RuleList from "@/components/community/rule/RuleList";
+import AboutCommunity from "@/components/community/comment/AboutCommunity";
+import CommunityAvatar from "@/components/community/CommunityAvatar";
+const PostsFeed = dynamic(() => import("@/components/PostsFeed"), {
+  ssr: false,
+});
+// import PostsFeed from "@/components/PostsFeed";
+import dynamic from "next/dynamic";
 
 type communityOption = {
   page?: number;
@@ -100,43 +85,40 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
   return (
     <>
       {/* bg */}
-      <div className="min-w-full pt-4">
+      <div className=" ">
         <div className="bg-sky-500 h-20"></div>
       </div>
       <div className="relative w-full h-24 py-3 bg-white border border-b-gray-200">
         <div className="mx-32">
           <div className="absolute -top-2 ">
-            <CommuAvatar />
+            <CommunityAvatar
+              className="w-24 h-24"
+              communityName={community.name}
+              profileImage={community.profileImage || ""}
+            />
           </div>
-          {/* text */}
-          <div className="pl-24">
-            <div className="flex gap-2 ">
-              <div>
-                <h1 className="text-xl md:text-3xl tracking-wider capitalize font-black">
-                  {slug}
-                </h1>
-                <p className="flex items-center space-x-1 mt-1 text-gray-500">
-                  {slug}
-                </p>
-              </div>
-              <div className="px-4">
-                {/* <Button className="bg-blue-500 rounded-2xl px-10 hover:bg-blue-300"> */}
-                {community.creatorId !== session?.user?.id ? (
-                  <SubscribeLeaveToggle
-                    isSubscribed={isSubscribed}
-                    communityId={community.id}
-                    communityName={community.name}
-                  />
-                ) : null}
-              </div>
+          <div className="flex items-center pl-28 space-x-4">
+            <h1 className="text-xl md:text-3xl tracking-wider capitalize font-black ">
+              {community.name}
+            </h1>
+
+            <div>
+              {community.creatorId !== session?.user?.id ? (
+                <SubscribeLeaveToggle
+                  isSubscribed={isSubscribed}
+                  communityId={community.id}
+                  communityName={community.name}
+                />
+              ) : null}
             </div>
           </div>
+          {/* text */}
         </div>
       </div>
 
       {/* content */}
-      <div className="grid  min-h-screen  bg-gray-200">
-        <div className="grid  mx-auto w-4/5 grid-cols-6 gap-x-6   py-6">
+      <div className="grid  min-h-screen bg-secondary">
+        <div className="grid  mx-auto w-4/5 grid-cols-6 gap-x-6 py-6">
           {/* <ToFeedButton /> */}
 
           <div className="col-span-4 space-y-4">
@@ -145,50 +127,24 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
                 <AvatarImage src={session?.user.image} />
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
-              <Link className="w-full" href={`/community/${slug}/create-post`}>
+              <Link className="w-full" href={`/community/${slug}/post/create`}>
                 <Input placeholder="Create Post..." />
               </Link>
             </div>
-            <PostsFeed initPosts={community.posts} communityName={slug} />
+            <PostsFeed initPosts={community.posts} communitySlug={slug} />
           </div>
 
           {/* info sidebar */}
           <div className="col-span-2  space-y-4">
-            <div className="w-screen md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
-              <div className="mx-6 pt-4 ">
-                <p className="font-semibold py-3 border-b border-gray-300 ">
-                  About Community
-                </p>
-              </div>
-              <dl className="divide-y divide-gray-100 px-6 py-4 text-sm leading-4 ">
-                <div className="flex justify-between gap-x-4 py-3">
-                  <dt className="text-gray-500">Created</dt>
-                  <dd className="text-gray-700">
-                    <time dateTime={community?.createdAt?.toDateString()}>
-                      {community?.createdAt
-                        ? format(community.createdAt, "MMMM d, yyyy")
-                        : "N/A"}
-                    </time>
-                  </dd>
-                </div>
-                <div className="flex justify-between gap-x-4 py-3">
-                  <dt className="text-gray-500">Members</dt>
-                  <dd className="flex items-start gap-x-2">
-                    <div className="text-gray-900">{memberCount}</div>
-                  </dd>
-                </div>
-                {community.creatorId === session?.user?.id ? (
-                  <div className="flex justify-between gap-x-4 py-3">
-                    <dt className="text-gray-500">
-                      You created this community
-                    </dt>
-                  </div>
-                ) : null}
-                <Link href={`/community/${slug}/create-post`}>
-                  <Button className="w-full">Create Post</Button>
-                </Link>
-              </dl>
-            </div>
+            <AboutCommunity
+              description={community.description}
+              title={community.title}
+              session={session}
+              memberCount={memberCount}
+              slug={community.slug}
+              createdAt={community.createdAt}
+              creatorId={community.creatorId}
+            />
             <RuleList
               session={session}
               communityCreatorId={community.creatorId}
