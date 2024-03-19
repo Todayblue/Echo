@@ -29,3 +29,13 @@ export const CreateUserValidator = z
 
 export type CreateUserPayload = z.infer<typeof CreateUserValidator>;
 export type LoginUserPayload = z.infer<typeof LoginUserValidator>;
+
+export const UpdateUserValidator = z.object({
+  name: z.string().optional(),
+  username: z.string().optional(),
+  bio: z.string().optional(),
+  image: z.string().optional(),
+  dateOfBirth: z.date().optional(),
+});
+
+export type UpdateUserPayload = z.infer<typeof UpdateUserValidator>;

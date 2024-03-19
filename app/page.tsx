@@ -112,8 +112,8 @@ export default async function Home() {
             </div>
             <div className="-my-3 divide-y divide-gray-100 grid px-6 py-4 text-sm leading-6 gap-y-2">
               <p className="text-zinc-500 pt-2">
-                Your personal Breadit frontpage. Come here to check in with your
-                favorite communities.
+                {/* Your personal Breadit frontpage. Come here to check in with your
+                favorite communities. */}
               </p>
               <div className="grid gap-y-2 pt-3 pb-2 ">
                 <Link href={`/community/create`}>

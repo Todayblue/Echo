@@ -26,12 +26,12 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
-model Profile {
-  id     Int    @id @default(autoincrement())
-  bio    String
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+// model Profile {
+//   id     Int    @id @default(autoincrement())
+
+//   userId String @unique
+//   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+// }
 
 model Session {
   id           String   @id @default(cuid())
@@ -46,15 +46,15 @@ model User {
   name             String?
   password         String?
   email            String?        @unique
-  emailVerified    DateTime?
   username         String?        @unique
+  bio              String?
+  dateOfBirth      DateTime?
   role             Role           @default(USER)
   image            String?
   accounts         Account[]
   Comment          Comment[]
   CommentVote      CommentVote[]
   Post             Post[]
-  Profile          Profile?
   createdCommunity Community[]    @relation("CreatedBy")
   subscriptions    Subscription[]
   votes            Vote[]

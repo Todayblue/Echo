@@ -1,13 +1,13 @@
 "use client";
-import React, { SyntheticEvent } from "react";
-import { useEffect, useState } from "react";
-import { MultiValue, ActionMeta, OnChangeValue } from "react-select";
-import { useForm } from "react-hook-form";
+import React, {SyntheticEvent} from "react";
+import {useEffect, useState} from "react";
+import {MultiValue, ActionMeta, OnChangeValue} from "react-select";
+import {useForm} from "react-hook-form";
 
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
 
 // components
-import { CardFooter } from "@/components/ui/card";
+import {CardFooter} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -16,28 +16,28 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Editor from "@/components/editor/Editor";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Button} from "@/components/ui/button";
 import Select from "react-tailwindcss-select";
-import { PhotoIcon } from "@heroicons/react/24/solid";
+import {PhotoIcon} from "@heroicons/react/24/solid";
 import Image from "next/image";
 import CreatableSelect from "react-select/creatable";
 
 // hooks
-import { useCustomToasts } from "@/hooks/use-custom-toasts";
-import { toast } from "@/hooks/use-toast";
+import {useCustomToasts} from "@/hooks/use-custom-toasts";
+import {toast} from "@/hooks/use-toast";
 
 // validator and types
-import { zodResolver } from "@hookform/resolvers/zod";
+import {zodResolver} from "@hookform/resolvers/zod";
 // import { ICommunity } from "@/types/db";
 
 // api
-import { useMutation, useQuery } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
-import { TagPayload } from "@/lib/validators/blog/tag";
-import { BlogPayload, BlogValidator } from "@/lib/validators/blog/blog";
-import { generateSlug } from "@/lib/slugtify";
+import {useMutation, useQuery} from "@tanstack/react-query";
+import axios, {AxiosError} from "axios";
+import {TagPayload} from "@/lib/validators/blog/tag";
+import {BlogPayload, BlogValidator} from "@/lib/validators/blog/blog";
+import {generateSlug} from "@/lib/slugtify";
 // import CreateCommunityPost from "@/components/community/post/CreateCommunityPost";
 
 interface CloudinaryResource {
@@ -85,9 +85,9 @@ type Option = {
   __isNew__: boolean;
 };
 
-const CreateBlog = ({ blogTags }: Props) => {
+const CreateBlog = ({blogTags}: Props) => {
   const router = useRouter();
-  const { loginToast } = useCustomToasts();
+  const {loginToast} = useCustomToasts();
   const [tagIds, setTagIds] = useState<String[]>([]);
   const [fileURL, setFileURL] = useState<string | undefined>();
   const [file, setFile] = useState<File | undefined>();
@@ -101,8 +101,8 @@ const CreateBlog = ({ blogTags }: Props) => {
 
   const createSubCommuPost = async (payload: BlogPayload) => {
     const imageUrl = await handleImageSubmit();
-    const payloadWithImage = { ...payload, imageUrl };
-    const { data } = await axios.post(
+    const payloadWithImage = {...payload, imageUrl};
+    const {data} = await axios.post(
       "/api/community/post/create",
       payloadWithImage
     );
@@ -136,16 +136,16 @@ const CreateBlog = ({ blogTags }: Props) => {
     }
     await handleTagData();
 
-    const { data } = await axios.post("/api/blog", payload);
+    const {data} = await axios.post("/api/blog", payload);
     return data;
   };
 
   const createTagData = async (payload: TagPayload) => {
-    const { data } = await axios.post("/api/blog/tag", payload);
+    const {data} = await axios.post("/api/blog/tag", payload);
     return data.tag;
   };
 
-  const { mutate: createBlog, isPending } = useMutation({
+  const {mutate: createBlog, isPending} = useMutation({
     mutationFn: async (values: BlogPayload) => createBlogPost(values),
     onError: (err) => {
       toast({
@@ -155,16 +155,19 @@ const CreateBlog = ({ blogTags }: Props) => {
       });
     },
     onSuccess: (data) => {
-      console.log("data", data);
       toast({
         title: "Created blog successfully 🚀",
         variant: "default",
         duration: 2000,
       });
+      setTimeout(() => {
+        router.push(`/blog/tag/all`);
+        router.refresh();
+      }, 1000);
     },
   });
 
-  const { mutate: createTag } = useMutation({
+  const {mutate: createTag} = useMutation({
     mutationFn: async (values: TagPayload) => createTagData(values),
   });
 
@@ -197,7 +200,7 @@ const CreateBlog = ({ blogTags }: Props) => {
       body: formData,
     });
 
-    const { results } = await response.json();
+    const {results} = await response.json();
 
     setSneakers((prev) => {
       if (!prev) return [results];
@@ -229,7 +232,7 @@ const CreateBlog = ({ blogTags }: Props) => {
               <FormField
                 control={form.control}
                 name="title"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormControl>
                       <Input placeholder="Add a Title..." {...field} />
@@ -283,7 +286,7 @@ const CreateBlog = ({ blogTags }: Props) => {
                       <FormField
                         control={form.control}
                         name="coverImage"
-                        render={({ field }) => (
+                        render={({field}) => (
                           <FormItem>
                             <FormControl>
                               <Input
@@ -309,7 +312,7 @@ const CreateBlog = ({ blogTags }: Props) => {
               <FormField
                 control={form.control}
                 name="content"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormControl>
                       <Editor

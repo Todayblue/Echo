@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import { CreateUserValidator } from "@/lib/validators/user";
+import { CreateUserValidator, UpdateUserValidator } from "@/lib/validators/user";
 
 
 export async function GET() {
