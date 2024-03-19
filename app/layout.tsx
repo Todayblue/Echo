@@ -15,8 +15,7 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  title: "DogWorld",
-  description: "blogs",
+  title: "echo",
 };
 
 export default function RootLayout({

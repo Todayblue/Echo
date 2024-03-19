@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { UpdateUserValidator } from "@/lib/validators/user";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -30,6 +31,39 @@ export async function GET(
     );
   }
 }
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await request.json();
+    const { bio, dateOfBirth, image, name, username} = UpdateUserValidator.parse(body);
+
+    const updateUser = await prisma.user.update({
+      where: {
+        id: params.id,
+      },
+      data: {
+        username,
+        bio,
+        dateOfBirth,
+        image,
+        name,
+      },
+    });
+    return NextResponse.json(
+      {message: "Success", user: updateUser},
+      {status: 200}
+    );
+  } catch (error) {
+    return NextResponse.json(
+      {message: "fail", error},
+      {status: 500}
+    );
+  }
+}
+
 
 // export async function PUT(
 //   request: Request,

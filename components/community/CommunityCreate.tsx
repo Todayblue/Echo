@@ -37,6 +37,7 @@ import {
   CreateCommunityPayload,
 } from "@/lib/validators/community";
 import { generateSlug } from "@/lib/slugtify";
+import { Textarea } from "../ui/textarea";
 
 interface CloudinaryResource {
   context?: {
@@ -135,11 +136,7 @@ const CommunityCreate = () => {
   }
 
   const onImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    toast({
-      title: "Created Community Successfully",
-      variant: "success",
-      duration: 2000,
-    });
+
     const uploadedFile = e.target.files?.[0];
 
     if (uploadedFile) {
@@ -183,7 +180,7 @@ const CommunityCreate = () => {
                   <FormField
                     control={form.control}
                     name="profileImage"
-                    render={({ field }) => (
+                    render={({field}) => (
                       <FormItem>
                         <FormControl>
                           <Input
@@ -203,7 +200,7 @@ const CommunityCreate = () => {
                 <FormField
                   control={form.control}
                   name="name"
-                  render={({ field }) => (
+                  render={({field}) => (
                     <FormItem>
                       <FormControl>
                         <Input {...field} className="pl-6" />
@@ -218,7 +215,7 @@ const CommunityCreate = () => {
                 <FormField
                   control={form.control}
                   name="title"
-                  render={({ field }) => (
+                  render={({field}) => (
                     <FormItem>
                       <FormControl>
                         <Input {...field} className="pl-6" />
@@ -233,10 +230,13 @@ const CommunityCreate = () => {
                 <FormField
                   control={form.control}
                   name="description"
-                  render={({ field }) => (
+                  render={({field}) => (
                     <FormItem>
                       <FormControl>
-                        <Input className="pl-6" {...field} />
+                        <Textarea
+                          className="pl-6 h-32"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

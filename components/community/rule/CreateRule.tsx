@@ -111,7 +111,7 @@ export const CreateRule = ({ community }: CreateRuleProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Textarea placeholder="Add a Description..." {...field} />
+                      <Textarea className="h-32" placeholder="Add a Description..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
