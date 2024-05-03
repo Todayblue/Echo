@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { SubscribeToCommunityPayload } from "@/lib/validators/communitySubscription";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
 import { startTransition } from "react";
 import { useToast } from "../hooks/use-toast";
 import { useCustomToasts } from "@/hooks/use-custom-toasts";

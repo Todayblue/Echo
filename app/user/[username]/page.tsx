@@ -1,33 +1,14 @@
 import React from "react";
 import {getAuthSession} from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import {ScrollArea} from "@/components/ui/scroll-area";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {ChevronDownIcon, Command, UserCog} from "lucide-react";
 import {INFINITE_SCROLL_PAGINATION_RESULTS} from "@/lib/config";
 import PostsFeed from "@/components/PostsFeed";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
 
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import FollowerCommunity from "@/components/FollowerCommunity";
+import {Suspense} from "react";
+import ImageGrid from "@/components/loading/ImageGrid";
 
 const page = async ({params: {username}}: {params: {username: string}}) => {
-  const session = await getAuthSession();
-
   const user = await prisma.user.findUnique({
     where: {
       username: username,

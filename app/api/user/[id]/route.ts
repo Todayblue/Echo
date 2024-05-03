@@ -9,7 +9,7 @@ export async function GET(
   try {
     const userId = params.id;
 
-    const user = await prisma.user.findFirst({
+    const user = await prisma.user.findUniqueOrThrow({
       where: {
         id: userId,
       },
@@ -38,7 +38,7 @@ export async function PATCH(
 ) {
   try {
     const body = await request.json();
-    const { bio, dateOfBirth, image, name, username} = UpdateUserValidator.parse(body);
+    const { bio, dateOfBirth, image, name, username } = UpdateUserValidator.parse(body);
 
     const updateUser = await prisma.user.update({
       where: {

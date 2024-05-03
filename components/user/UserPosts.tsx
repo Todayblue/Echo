@@ -75,7 +75,6 @@ const PostsFeed = ({initPosts, fetchPostsUrl}: PostsFeedProps) => {
           return (
             <li key={post.id} ref={ref}>
               <PostCard
-                key={post.id}
                 id={post.id}
                 slug={post.community.slug}
                 image={post.imageUrl}
@@ -91,19 +90,21 @@ const PostsFeed = ({initPosts, fetchPostsUrl}: PostsFeedProps) => {
           );
         } else {
           return (
-            <PostCard
-              key={post.id}
-              id={post.id}
-              slug={post.community.slug}
-              image={post.imageUrl}
-              commu={post.community.name}
-              author={post.author.name}
-              title={post.title}
-              content={post.content}
-              createdAt={post.createdAt}
-              votesAmt={votesAmt}
-              currentVote={currentVote}
-            />
+            <li key={post.id} ref={ref}>
+              <PostCard
+                key={post.id}
+                id={post.id}
+                slug={post.community.slug}
+                image={post.imageUrl}
+                commu={post.community.name}
+                author={post.author.name}
+                title={post.title}
+                content={post.content}
+                createdAt={post.createdAt}
+                votesAmt={votesAmt}
+                currentVote={currentVote}
+              />
+            </li>
           );
         }
       })}

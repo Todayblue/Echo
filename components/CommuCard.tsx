@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { cn } from "@/lib/utils";
+import {cn} from "@/lib/utils";
 
-import { ContextMenu, ContextMenuTrigger } from "./ui/context-menu";
+import {ContextMenu, ContextMenuTrigger} from "./ui/context-menu";
 
 interface CommuCardProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
@@ -45,7 +45,7 @@ export function CommuCard({
         </ContextMenuTrigger>
       </ContextMenu>
       <div className="space-y-1 text-sm">
-        <h3 className="font-extrabold text-gray-800 leading-none text-center capitalize">
+        <h3 className="font-extrabold text-gray-800 leading-none text-center capitalize text-clip overflow-hidden ">
           {name}
         </h3>
       </div>

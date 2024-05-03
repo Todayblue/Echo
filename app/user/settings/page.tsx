@@ -1,7 +1,23 @@
 import { Separator } from "@/components/ui/separator";
 import { ProfileForm } from "./profile-form";
+import { getSession } from "next-auth/react";
+import prisma from "@/lib/prisma";
 
-export default function SettingsProfilePage() {
+export default async function SettingsProfilePage() {
+  const session = await getSession()
+
+  const user = await prisma.user.findFirst({
+    where: {
+      id: session?.user.id
+    },
+    select: {
+      username: true,
+      bio: true,
+      dateOfBirth: true,
+      name: true,
+    }
+  })
+
   return (
     <div className="space-y-6">
       <div>

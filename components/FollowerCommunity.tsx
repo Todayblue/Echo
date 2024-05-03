@@ -2,12 +2,17 @@ import Link from "next/link";
 import React from "react";
 import CommunityAvatar from "./community/CommunityAvatar";
 import {Community} from "@prisma/client";
+import TaskList from "./loading/TaskList";
 
 type Props = {
   communityFollower: Community[];
 };
 
 const FollowerCommunity = ({communityFollower}: Props) => {
+  if (!communityFollower) {
+    <TaskList />;
+  }
+
   return (
     <div className="bg-white">
       <div className="w-full h-auto rounded-md border bg-white">
@@ -18,29 +23,25 @@ const FollowerCommunity = ({communityFollower}: Props) => {
         </div>
         <div className="mx-6 ">
           {communityFollower.map((community) => (
-            <div
-              key={community.id}
-              className="grid grid-cols-10 space-y-4 items-center border-b"
-            >
-              <Link
-                className="col-span-1 shrink-0"
-                href={`/community/${community.slug}`}
-              >
-                <CommunityAvatar
-                  communityName={community.name}
-                  profileImage={community.profileImage || ""}
-                  className="w-12 h-12"
-                />
-              </Link>
-              <div className="w-full col-span-9 ">
-                <Link href={`/community/${community.slug}`}>
-                  <h1 className="text-xl font-semibold hover:underline ">
-                    {community.name}
-                  </h1>
+            <div className="border-b py-4" key={community.id}>
+              <div className="flex items-center">
+                <Link href={`/community/${community.slug}`} className="mr-4">
+                  <CommunityAvatar
+                    communityName={community.name}
+                    profileImage={community.profileImage || ""}
+                    className="w-12 h-12"
+                  />
                 </Link>
-                <p className="text-sm text-muted-foreground text-gray-300">
-                  {community.description}
-                </p>
+                <div className="w-full">
+                  <Link href={`/community/${community.slug}`}>
+                    <h1 className="text-xl font-semibold hover:underline">
+                      {community.name}
+                    </h1>
+                  </Link>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {community.description}
+                  </p>
+                </div>
               </div>
             </div>
           ))}

@@ -1,23 +1,23 @@
 import AboutCommunity from "@/components/community/comment/AboutCommunity";
 import RuleList from "@/components/community/rule/RuleList";
-import { Button } from "@/components/ui/button";
-import { getAuthSession } from "@/lib/auth";
+import {Button} from "@/components/ui/button";
+import {getAuthSession} from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { format } from "date-fns";
+import {format} from "date-fns";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import {notFound} from "next/navigation";
 
 export default async function Layout({
   children,
-  params: { slug },
+  params: {slug},
 }: {
   children: React.ReactNode;
-  params: { slug: string };
+  params: {slug: string};
 }) {
   const session = await getAuthSession();
 
   const community = await prisma.community.findFirst({
-    where: { slug: slug },
+    where: {slug: slug},
     include: {
       rule: true,
       posts: {
@@ -56,15 +56,7 @@ export default async function Layout({
           <div className="col-span-4">{children}</div>
           {/* info sidebar */}
           <div className="col-span-2 flex flex-col space-y-4">
-            <AboutCommunity
-              title={community.title}
-              description={community.description}
-              session={session}
-              memberCount={memberCount}
-              slug={community.slug}
-              createdAt={community.createdAt}
-              creatorId={community.creatorId}
-            />
+            <AboutCommunity memberCount={memberCount} community={community} />
           </div>
         </div>
       </div>

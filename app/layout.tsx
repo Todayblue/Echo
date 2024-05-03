@@ -1,13 +1,14 @@
 import "../styles/globals.css";
-import type { Metadata } from "next";
-import { Lato } from "next/font/google";
-import { ThemeProvider } from "@/components/ThemeProvider";
-
-import { NextAuthProvider } from "@/components/NextAuthProvider";
+import type {Metadata} from "next";
+import {Lato} from "next/font/google";
+import {ThemeProvider} from "@/components/ThemeProvider";
+import {NextAuthProvider} from "@/components/NextAuthProvider";
 import QueryProvider from "@/components/QueryProvider";
-import { Toaster } from "@/components/ui/toaster";
+import {Toaster} from "@/components/ui/toaster";
 import NavBar from "@/components/nav/NavBar";
-import { cn } from "@/lib/utils";
+import {cn} from "@/lib/utils";
+import ProgressBarProvider from "@/components/ProgressBarProvider";
+import {Suspense} from "react";
 
 const lato = Lato({
   weight: "400",
@@ -18,11 +19,7 @@ export const metadata: Metadata = {
   title: "echo",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html
       lang="en"
@@ -41,8 +38,12 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <NavBar />
-              <div className="w-full h-screen">{children}</div>
+              <Suspense>
+                <ProgressBarProvider>
+                  <NavBar />
+                  <div className="w-full h-screen">{children}</div>
+                </ProgressBarProvider>
+              </Suspense>
             </ThemeProvider>
           </NextAuthProvider>
         </QueryProvider>

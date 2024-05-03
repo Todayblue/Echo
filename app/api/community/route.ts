@@ -5,26 +5,26 @@ import { CommunityValidator } from "@/lib/validators/community";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-// export async function GET() {
-//   try {
-//     const community = await prisma.community.findMany({
-//       include: {
-//         subscribers: {
-//           include: {
-//             user: true,
-//           },
-//         },
-//       },
-//     });
+export async function GET() {
+  try {
+    const community = await prisma.community.findMany({
+      include: {
+        subscribers: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
 
-//     return NextResponse.json(community);
-//   } catch (error) {
-//     return NextResponse.json(
-//       { message: "Could not get community", error },
-//       { status: 500 }
-//     );
-//   }
-// }
+    return NextResponse.json(community);
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Could not get community", error },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(req: Request) {
   const session = await getAuthSession();

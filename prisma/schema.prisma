@@ -26,13 +26,6 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
-// model Profile {
-//   id     Int    @id @default(autoincrement())
-
-//   userId String @unique
-//   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-// }
-
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -51,6 +44,7 @@ model User {
   dateOfBirth      DateTime?
   role             Role           @default(USER)
   image            String?
+  emailVerified    DateTime?
   accounts         Account[]
   Comment          Comment[]
   CommentVote      CommentVote[]
@@ -99,9 +93,12 @@ model Post {
   title       String
   content     String?
   imageUrl    String?
+  videoUrl    String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   authorId    String
+  latitude    Float?
+  longitude   Float?
   communityId String
   votes       Vote[]
   comments    Comment[]

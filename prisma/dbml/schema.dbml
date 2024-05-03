@@ -1,0 +1,221 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Account {
+  id Int [pk, increment]
+  userId String [not null]
+  type String [not null]
+  provider String [not null]
+  providerAccountId String [not null]
+  refresh_token String
+  access_token String
+  expires_at Int
+  token_type String
+  scope String
+  id_token String
+  session_state String
+  user User [not null]
+
+  indexes {
+    (provider, providerAccountId) [unique]
+  }
+}
+
+Table Session {
+  id String [pk]
+  sessionToken String [unique, not null]
+  userId String [not null]
+  expires DateTime [not null]
+  user User [not null]
+}
+
+Table User {
+  id String [pk]
+  name String
+  password String
+  email String [unique]
+  username String [unique]
+  bio String
+  dateOfBirth DateTime
+  role Role [not null, default: 'USER']
+  image String
+  accounts Account [not null]
+  Comment Comment [not null]
+  CommentVote CommentVote [not null]
+  Post Post [not null]
+  createdCommunity Community [not null]
+  subscriptions Subscription [not null]
+  votes Vote [not null]
+  rule Rule [not null]
+  Session Session [not null]
+  Blog Blog [not null]
+  Tag Tag [not null]
+}
+
+Table Community {
+  id String [pk]
+  slug String
+  name String [unique, not null]
+  title String
+  description String
+  profileImage String
+  coverImage String
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  creatorId String [not null]
+  posts Post [not null]
+  creator User
+  subscribers Subscription [not null]
+  rule Rule [not null]
+}
+
+Table Subscription {
+  name String [unique]
+  userId String [not null]
+  communityId String [not null]
+  community Community [not null]
+  user User [not null]
+
+  indexes {
+    (userId, communityId) [pk]
+  }
+}
+
+Table Post {
+  id String [pk]
+  slug String
+  title String [not null]
+  content String
+  imageUrl String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  authorId String [not null]
+  communityId String [not null]
+  votes Vote [not null]
+  comments Comment [not null]
+  community Community [not null]
+  author User [not null]
+}
+
+Table Rule {
+  id String [pk]
+  title String [not null]
+  description String [not null]
+  authorId String [not null]
+  communityId String [not null]
+  author User [not null]
+  community Community [not null]
+}
+
+Table Comment {
+  id String [pk]
+  text String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  authorId String [not null]
+  postId String [not null]
+  replyToId String
+  commentId String
+  author User [not null]
+  post Post [not null]
+  replyTo Comment
+  replies Comment [not null]
+  votes CommentVote [not null]
+}
+
+Table Vote {
+  userId String [not null]
+  postId String [not null]
+  type VoteType [not null]
+  post Post [not null]
+  user User [not null]
+
+  indexes {
+    (userId, postId) [pk]
+  }
+}
+
+Table CommentVote {
+  userId String [not null]
+  commentId String [not null]
+  type VoteType [not null]
+  comment Comment [not null]
+  user User [not null]
+
+  indexes {
+    (userId, commentId) [pk]
+  }
+}
+
+Table Blog {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  slug String [unique]
+  title String [not null]
+  content String [not null]
+  coverImage String [not null]
+  author User [not null]
+  authorId String [not null]
+  tags Tag [not null]
+}
+
+Table Tag {
+  id Int [pk, increment]
+  slug String [unique]
+  blogs Blog [not null]
+  createdAt DateTime [default: `now()`, not null]
+  name String [unique, not null]
+  author User [not null]
+  authorId String [not null]
+}
+
+Table BlogToTag {
+  tagsId Int [ref: > Tag.id]
+  blogsId Int [ref: > Blog.id]
+}
+
+Enum Role {
+  ADMIN
+  USER
+}
+
+Enum VoteType {
+  UP
+  DOWN
+}
+
+Ref: Account.userId > User.id [delete: Cascade]
+
+Ref: Session.userId > User.id [delete: Cascade]
+
+Ref: Community.creatorId > User.id
+
+Ref: Subscription.communityId > Community.id
+
+Ref: Subscription.userId > User.id
+
+Ref: Post.communityId > Community.id [delete: Cascade]
+
+Ref: Post.authorId > User.id
+
+Ref: Rule.authorId > User.id
+
+Ref: Rule.communityId > Community.id [delete: Cascade]
+
+Ref: Comment.authorId > User.id
+
+Ref: Comment.postId > Post.id [delete: Cascade]
+
+Ref: Comment.replyToId - Comment.id [delete: No Action]
+
+Ref: Vote.postId > Post.id [delete: Cascade]
+
+Ref: Vote.userId > User.id
+
+Ref: CommentVote.commentId > Comment.id [delete: Cascade]
+
+Ref: CommentVote.userId > User.id
+
+Ref: Blog.authorId > User.id [delete: Cascade]
+
+Ref: Tag.authorId > User.id [delete: Cascade]

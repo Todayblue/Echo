@@ -1,11 +1,11 @@
 "use client";
 
-import { Prisma, Community } from "@prisma/client";
-import { useQuery } from "@tanstack/react-query";
+import {Prisma, Community} from "@prisma/client";
+import {useQuery} from "@tanstack/react-query";
 import axios from "axios";
 import debounce from "lodash.debounce";
-import { usePathname, useRouter } from "next/navigation";
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import {usePathname, useRouter} from "next/navigation";
+import {FC, useCallback, useEffect, useRef, useState} from "react";
 
 import {
   Command,
@@ -15,8 +15,8 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { useOnClickOutside } from "@/hooks/use-on-click-outside";
-import { Users } from "lucide-react";
+import {useOnClickOutside} from "@/hooks/use-on-click-outside";
+import {Search, Users} from "lucide-react";
 
 interface SearchBarProps {}
 
@@ -48,7 +48,7 @@ const SearchBar: FC<SearchBarProps> = ({}) => {
   } = useQuery({
     queryFn: async () => {
       if (!input) return [];
-      const { data } = await axios.get(`/api/search?q=${input}`);
+      const {data} = await axios.get(`/api/search/community?q=${input}`);
       return data as (Community & {
         _count: Prisma.CommunityCountOutputType;
       })[];
@@ -68,23 +68,22 @@ const SearchBar: FC<SearchBarProps> = ({}) => {
     >
       <CommandInput
         isLoading={isFetching}
-        onValueChange={(text) => {
+        onValueChange={(text: string) => {
           setInput(text);
           debounceRequest();
         }}
         value={input}
         className="outline-none border-none focus:border-none focus:outline-none ring-0"
-        placeholder="Search communities..."
+        placeholder="Search"
       />
 
       {input.length > 0 && (
         <CommandList className="absolute bg-white top-full inset-x-0 shadow rounded-b-md">
-          {isFetched && <CommandEmpty>No results found.</CommandEmpty>}
           {(queryResults?.length ?? 0) > 0 ? (
             <CommandGroup heading="Communities">
               {queryResults?.map((community) => (
                 <CommandItem
-                  onSelect={(e) => {
+                  onSelect={(e: any) => {
                     router.push(`/community/${e}`);
                     router.refresh();
                   }}
@@ -97,6 +96,9 @@ const SearchBar: FC<SearchBarProps> = ({}) => {
               ))}
             </CommandGroup>
           ) : null}
+          <CommandItem>
+            <a href={`/search?q=${input}&type=post`}>Search for {input}</a>
+          </CommandItem>
         </CommandList>
       )}
     </Command>

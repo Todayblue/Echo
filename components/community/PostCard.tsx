@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import PostVoteClient from "./vote/PostVoteClient";
+import Video from "../Video";
 
 type PartialVote = Pick<Vote, "type">;
 
@@ -19,6 +20,7 @@ type PostCardProps = {
   image: string | null;
   content: string | null;
   createdAt: Date;
+  videoUrl?: string | null;
 
   currentVote?: PartialVote;
   votesAmt: number;
@@ -31,6 +33,7 @@ const PostCard = ({
   author,
   title,
   image,
+  videoUrl,
   content,
   createdAt,
   votesAmt,
@@ -77,6 +80,12 @@ const PostCard = ({
                 />
               </figure>
             )}
+            {videoUrl && (
+              <Video
+                src={videoUrl}
+                className="m-h-[512px] rounded-sm w-full object-contain"
+              />
+            )}
             <div
               className="relative text-sm max-h-40 w-full overflow-clip"
               ref={pRef}
@@ -84,7 +93,7 @@ const PostCard = ({
               {cleanContent ? (
                 <div
                   className="text-gray-700"
-                  dangerouslySetInnerHTML={{ __html: cleanContent }}
+                  dangerouslySetInnerHTML={{__html: cleanContent}}
                 />
               ) : null}
               {/* h-40 = 160px */}

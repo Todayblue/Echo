@@ -13,13 +13,14 @@ import {getAuthSession} from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import {Home as HomeIcon} from "lucide-react";
 import Link from "next/link";
+import {APIProvider, Map, Marker} from "@vis.gl/react-google-maps";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 export default async function Home() {
   const session = await getAuthSession();
-
+  const position = {lat: 53.54992, lng: 10.00678};
   const communityPosts = await prisma.community.findMany({
     include: {
       posts: {
@@ -59,7 +60,7 @@ export default async function Home() {
           <RecentBlogPosts />
         </div> */}
 
-        <ScrollArea className="w-full h-auto rounded-md border bg-white ">
+        {/* <ScrollArea className="w-full h-auto rounded-md border bg-white ">
           <div className="border-b bg-secondary  px-6 py-3">
             <p className="tracking-wide text-base  font-semibold">
               Choose Community
@@ -78,7 +79,7 @@ export default async function Home() {
               />
             ))}
           </div>
-        </ScrollArea>
+        </ScrollArea> */}
       </div>
 
       <div className="grid mx-auto w-4/5 grid-cols-6 gap-x-6 pb-6">

@@ -1,21 +1,25 @@
 import AboutCommunity from "@/components/community/comment/AboutCommunity";
 import CommentPost from "@/components/community/comment/CommentPost";
 import RuleList from "@/components/community/rule/RuleList";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { getAuthSession } from "@/lib/auth";
+import {Button, buttonVariants} from "@/components/ui/button";
+import {getAuthSession} from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { ArrowBigDown, ArrowBigUp, Dot, Loader2 } from "lucide-react";
-import { notFound } from "next/navigation";
-import { Suspense } from "react";
-import { PostVoteServer } from "@/components/community/vote/PostVoteServer";
-import { formatTimeToNow } from "@/lib/utils";
+import {ArrowBigDown, ArrowBigUp, Dot, Loader2} from "lucide-react";
+import {notFound} from "next/navigation";
+import {Suspense} from "react";
+import {PostVoteServer} from "@/components/community/vote/PostVoteServer";
+import {formatTimeToNow} from "@/lib/utils";
 import CommentsSection from "@/components/community/comment/CommentPost";
 import Image from "next/image";
+import GoogleMap from "@/components/GoogleMap";
+import {Card} from "@/components/ui/card";
+import Video from "@/components/Video";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-const Page = async ({ params: { id } }: { params: { id: string } }) => {
+const Page = async ({params: {id}}: {params: {id: string}}) => {
   const session = await getAuthSession();
 
   const post = await prisma.post.findFirst({
@@ -30,23 +34,14 @@ const Page = async ({ params: { id } }: { params: { id: string } }) => {
   });
 
   const community = await prisma.community.findFirst({
-    where: { id: post?.communityId },
-  });
-
-  const memberCount = await prisma.subscription.count({
-    where: {
-      community: {
-        id: post?.communityId,
+    where: {id: post?.communityId},
+    include: {
+      rule: true,
+      _count: {
+        select: {
+          subscribers: true,
+        },
       },
-    },
-  });
-
-  const rules = await prisma.rule.findMany({
-    where: {
-      communityId: post?.communityId,
-    },
-    orderBy: {
-      id: "asc",
     },
   });
 
@@ -65,7 +60,7 @@ const Page = async ({ params: { id } }: { params: { id: string } }) => {
         <div className="grid place-content-center lg:grid-cols-6  gap-6 md:grid-cols-1 ">
           {/* <ToFeedButton /> */}
           <div className="col-span-4 space-y-4">
-            <div className="flex flex-row space-x-3 p-2 w-full border border-gray-300 rounded-md bg-white">
+            <Card className="flex flex-row space-x-3 p-2 ">
               <div className=" w-full">
                 <div className="border border-gray-300  bg-white  p-4 flex leading-normal rounded-lg">
                   <Suspense fallback={<PostVoteShell />}>
@@ -101,7 +96,7 @@ const Page = async ({ params: { id } }: { params: { id: string } }) => {
                         {cleanContent ? (
                           <div
                             className="text-gray-700"
-                            dangerouslySetInnerHTML={{ __html: cleanContent }}
+                            dangerouslySetInnerHTML={{__html: cleanContent}}
                           />
                         ) : null}
                         {/* h-40 = 160px */}
@@ -119,10 +114,26 @@ const Page = async ({ params: { id } }: { params: { id: string } }) => {
                         />
                       </figure>
                     )}
+                    {post.videoUrl && (
+                      <Video
+                        src={post.videoUrl}
+                        className="m-h-[512px] rounded-sm w-full object-contain"
+                      />
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
+            {post.latitude && post.longitude ? (
+              <Card>
+                <div className="w-full h-60 p-2">
+                  <GoogleMap
+                    lat={Number(post.latitude)}
+                    lng={Number(post.longitude)}
+                  />
+                </div>
+              </Card>
+            ) : null}
             {/* Comment */}
             <Suspense
               fallback={
@@ -136,21 +147,12 @@ const Page = async ({ params: { id } }: { params: { id: string } }) => {
           {/* info sidebar */}
           <div className="col-span-2 flex flex-col space-y-4">
             <AboutCommunity
-              title={community.title}
-              description={community.description}
-              session={session}
-              memberCount={memberCount}
-              slug={community.slug}
-              createdAt={community.createdAt}
-              creatorId={community.creatorId}
+              community={community}
+              memberCount={community._count.subscribers}
             />
-            <RuleList
-              session={session}
-              communityCreatorId={community.creatorId}
-              communitySlug={community.slug}
-              communityName={community.name}
-              rules={rules}
-            />
+            {community.rule.length > 0 && (
+              <RuleList rules={community.rule} community={community} />
+            )}
           </div>
         </div>
       </div>

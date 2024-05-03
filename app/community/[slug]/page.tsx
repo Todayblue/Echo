@@ -137,19 +137,11 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
           {/* info sidebar */}
           <div className="col-span-2  space-y-4">
             <AboutCommunity
-              description={community.description}
-              title={community.title}
-              session={session}
+              community={community}
               memberCount={memberCount}
-              slug={community.slug}
-              createdAt={community.createdAt}
-              creatorId={community.creatorId}
             />
             <RuleList
-              session={session}
-              communityCreatorId={community.creatorId}
-              communitySlug={community.slug}
-              communityName={community.name}
+              community={community}
               rules={rules}
             />
           </div>
