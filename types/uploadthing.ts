@@ -1,4 +1,4 @@
-export type UploadFileResponse<TServerOutput> = {
+export type UploadFileResponse = {
   name: string;
   size: number;
   key: string;
@@ -6,5 +6,5 @@ export type UploadFileResponse<TServerOutput> = {
 
   // Matches what's returned from the serverside `onUploadComplete` callback
   // Will be `null` if `skipPolling` is set to `true`.
-  serverdata: TServerOutput;
+  // serverdata: TServerOutput;
 };

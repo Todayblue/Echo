@@ -3,17 +3,17 @@ import React from "react";
 import {APIProvider, Map, Marker} from "@vis.gl/react-google-maps";
 
 type Props = {
-  lat: number;
-  lng: number;
+  lat: string;
+  lng: string;
 };
 
 const GoogleMap = ({lat, lng}: Props) => {
-  const position = { lat: lat, lng: lng };
+  const position = {lat: parseFloat(lat), lng: parseFloat(lng)};
 
   const onMarkClick = () => {
-     const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 
-     window.open(googleMapsUrl, "_blank");
+    window.open(googleMapsUrl, "_blank");
   };
 
   return (

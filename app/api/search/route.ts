@@ -1,80 +1,104 @@
 import prisma from "@/lib/prisma";
 import {NextResponse} from "next/server";
+import {calSkip} from "@/lib/calSkip";
+import {getSortBy, getTimeRange} from "@/lib/utils";
 
 interface SearchParams {
-  query: string | null;
-  type: string | null;
+  query: string;
+  page: number;
+  limit: number;
+  type: "posts" | "communities";
+  time: "year" | "month" | "week" | "day" | "hour" | null;
+  sort: "relevance" | "new" | "comments" | "votes" | null;
 }
 
-async function performSearch(query: string | null, type: string | null) {
-  if (!query) {
-    return new Response("Invalid query", {status: 400});
+async function performSearch(searchParams: SearchParams) {
+  if (!searchParams.query || !searchParams.type) {
+    return new Response("Invalid query parameters", {status: 400});
   }
+
+  const {page, limit, type, time, sort, query} = searchParams;
+  const skip = calSkip(page, limit);
+  const {start, end} = getTimeRange(time);
+  const {sortBy, whereClause} = getSortBy(sort, query, start, end);
 
   let results: any[] = [];
-
   switch (type) {
-    case "post":
-      results = await prisma.post.findMany({
-        where: {
-          title: {
-            search: query,
-          },
-        },
-        include: {
-          community: true,
-          comments: true,
-          votes: {
-            where: {
-              type: 'UP'
-            },
-          },
-          _count: true,
-        },
-      });
+    case "posts":
+      results = await searchPosts(skip, limit, sortBy, whereClause);
       break;
-    case "community":
-      results = await prisma.community.findMany({
-        where: {
-          name: {
-            search: query,
-          },
-        },
-        include: {
-          _count: true,
-        },
-      });
-      break;
-    case "comment":
-      results = await prisma.comment.findMany({
-        where: {
-          text: {
-            search: query,
-          },
-        },
-        include: {
-          _count: true,
-        },
-      });
+    case "communities":
+      results = await searchCommunities(query, skip, limit);
       break;
     default:
-      break;
+      return new Response("Invalid search type", {status: 400});
   }
-
   return results;
 }
 
+async function searchPosts(
+  skip: number,
+  limit: number,
+  sortBy: any,
+  whereClause: any
+) {
+  return prisma.post.findMany({
+    where: whereClause,
+    include: {
+      community: true,
+      comments: true,
+      votes: true,
+      _count: true,
+    },
+    skip,
+    take: limit,
+    orderBy: sortBy,
+  });
+}
+
+async function searchCommunities(query: string, skip: number, limit: number) {
+  const searchTerms = query.split(" ");
+  return prisma.community.findMany({
+    where: {
+      isActive: true,
+      OR: searchTerms.map((term) => ({
+        slug: {
+          contains: term,
+          mode: "insensitive",
+        },
+      })),
+    },
+    include: {
+      _count: true,
+    },
+    skip,
+    take: limit,
+  });
+}
+
 export async function GET(req: Request) {
-  const {query, type}: SearchParams = {
-    query: new URL(req.url).searchParams.get("q"),
-    type: new URL(req.url).searchParams.get("type"),
+  const url = new URL(req.url);
+  const searchParams: SearchParams = {
+    query: url.searchParams.get("q") || "",
+    type: (url.searchParams.get("type") as "posts" | "communities") || "posts",
+    limit: Number(url.searchParams.get("limit") || 5),
+    page: Number(url.searchParams.get("page") || 1),
+    time: url.searchParams.get("time") as
+      | "year"
+      | "month"
+      | "week"
+      | "day"
+      | "hour"
+      | null,
+    sort: url.searchParams.get("sort") as
+      | "relevance"
+      | "new"
+      | "comments"
+      | "votes"
+      | null,
   };
 
-  const results = await performSearch(query, type);
-
-  console.log("🚀 ---------------------🚀");
-  console.log("🚀 ~ results:", results);
-  console.log("🚀 ---------------------🚀");
+  const results = await performSearch(searchParams);
 
   return NextResponse.json(results);
 }

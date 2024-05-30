@@ -1,10 +1,7 @@
 import AboutCommunity from "@/components/community/comment/AboutCommunity";
 import RuleList from "@/components/community/rule/RuleList";
-import {Button} from "@/components/ui/button";
-import {getAuthSession} from "@/lib/auth";
+import {ScrollArea} from "@/components/ui/scroll-area";
 import prisma from "@/lib/prisma";
-import {format} from "date-fns";
-import Link from "next/link";
 import {notFound} from "next/navigation";
 
 export default async function Layout({
@@ -14,10 +11,11 @@ export default async function Layout({
   children: React.ReactNode;
   params: {slug: string};
 }) {
-  const session = await getAuthSession();
-
   const community = await prisma.community.findFirst({
-    where: {slug: slug},
+    where: {
+      slug: slug,
+      isActive: true,
+    },
     include: {
       rule: true,
       posts: {
@@ -29,16 +27,16 @@ export default async function Layout({
     },
   });
 
-  if (!community) return notFound();
-
   const rules = await prisma.rule.findMany({
     where: {
-      communityId: community.id,
+      communityId: community?.id,
     },
     orderBy: {
       id: "asc",
     },
   });
+
+  if (!community) return notFound();
 
   const memberCount = await prisma.subscription.count({
     where: {
@@ -49,17 +47,25 @@ export default async function Layout({
   });
 
   return (
-    <div className="grid  min-h-screen  bg-secondary ">
-      <div className="py-16 mx-24 ">
-        <div className="grid place-content-center lg:grid-cols-6  gap-6 md:grid-cols-1 ">
-          {/* <ToFeedButton /> */}
-          <div className="col-span-4">{children}</div>
-          {/* info sidebar */}
-          <div className="col-span-2 flex flex-col space-y-4">
-            <AboutCommunity memberCount={memberCount} community={community} />
+    <ScrollArea className="h-full px-52 pt-6">
+      <div className="grid place-content-center lg:grid-cols-6  gap-6 md:grid-cols-1 ">
+        <div className="col-span-4">{children}</div>
+        <div className="col-span-2 space-y-4 ">
+          <div className="sticky top-0 ">
+            <div className="overflow-y-auto max-h-screen ">
+              <div className="grid gap-4 mb-6">
+                <AboutCommunity
+                  community={community}
+                  memberCount={memberCount}
+                />
+                {rules.length > 0 && (
+                  <RuleList community={community} rules={rules} />
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 }

@@ -5,6 +5,9 @@ import {NextResponse} from "next/server";
 export async function GET() {
   try {
     const communities = await prisma.community.findMany({
+      where: {
+        isActive: true,
+      },
       select: {
         id: true,
         name: true,

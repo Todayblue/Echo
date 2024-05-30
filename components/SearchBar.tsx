@@ -97,7 +97,9 @@ const SearchBar: FC<SearchBarProps> = ({}) => {
             </CommandGroup>
           ) : null}
           <CommandItem>
-            <a href={`/search?q=${input}&type=post`}>Search for {input}</a>
+            <a href={`/search?q=${input}&type=posts&sort=relevance&time=all`}>
+              Search for {input}
+            </a>
           </CommandItem>
         </CommandList>
       )}

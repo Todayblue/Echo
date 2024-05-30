@@ -3,7 +3,7 @@ import {notFound} from "next/navigation";
 import prisma from "@/lib/prisma";
 import {INFINITE_SCROLL_PAGINATION_RESULTS} from "@/lib/config";
 import {VoteType} from "@prisma/client";
-import PostsFeed from "@/components/user/UserPosts";
+import UserPostsFeed from "@/components/user/UserPostsFeed";
 
 const page = async () => {
   const session = await getAuthSession();
@@ -32,12 +32,7 @@ const page = async () => {
     take: INFINITE_SCROLL_PAGINATION_RESULTS,
   });
 
-  return (
-    <PostsFeed
-      initPosts={posts}
-      fetchPostsUrl={`/api/user/posts/votes?voteType=${voteDown}&`}
-    />
-  );
+  return <UserPostsFeed initPosts={posts} searchType={"downvote"} />;
 };
 
 export default page;

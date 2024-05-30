@@ -14,6 +14,7 @@ export async function GET(
     const community = await prisma.community.findFirst({
       where: {
         slug: params.slug,
+        isActive: true,
       },
     });
 
@@ -77,5 +78,101 @@ export async function POST(req: Request) {
       return new Response(error.message, {status: 422});
     }
     return new Response("Could not create community", {status: 500});
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  {params}: {params: {slug: string}}
+) {
+  const session = await getAuthSession();
+
+  if (!session?.user) {
+    return new Response("Unauthorized", {status: 401});
+  }
+
+  try {
+    const body = await request.json();
+    const {id, name, description, title, isActive, profileImage} =
+      CommunityValidator.parse(body);
+
+    const existingCommunity = await prisma.community.findUnique({
+      where: {
+        slug: params.slug,
+      },
+    });
+
+    let currentSlug =
+      existingCommunity?.name !== name ? generateSlug(name) : params.slug;
+
+    // create community and associate it with the user
+    const community = await prisma.community.update({
+      where: {
+        id: id,
+      },
+      data: {
+        name,
+        slug: currentSlug,
+        profileImage: profileImage,
+        title: title,
+        description: description,
+        isActive: isActive,
+      },
+    });
+
+    if (existingCommunity?.isActive === false && isActive === true) {
+      await prisma.notification.create({
+        data: {
+          message: `${existingCommunity.name} community is active now`,
+          type: "COMMUNITY_APPROVED",
+          herf: `/community/${existingCommunity.slug}`,
+          userId: existingCommunity.creatorId,
+        },
+      });
+    }
+
+    return NextResponse.json(community);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return new Response(error.message, {status: 422});
+    }
+    return new Response("Could not create community", {status: 500});
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  {params}: {params: {slug: string}}
+) {
+  try {
+    const {slug} = params;
+
+    const {id} = await prisma.community.findFirstOrThrow({
+      where: {
+        slug: slug,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    await prisma.subscription.deleteMany({
+      where: {
+        communityId: id,
+      },
+    });
+
+    const deletedCommunity = await prisma.community.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    return NextResponse.json(
+      {message: "Success", deletedCommunity},
+      {status: 200}
+    );
+  } catch (error) {
+    return NextResponse.json(error);
   }
 }

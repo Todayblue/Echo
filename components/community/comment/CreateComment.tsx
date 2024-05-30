@@ -5,7 +5,7 @@ import { CommentRequest } from "@/lib/validators/comment";
 import { useCustomToasts } from "@/hooks/use-custom-toasts";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next-nprogress-bar"
 import { FC, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";

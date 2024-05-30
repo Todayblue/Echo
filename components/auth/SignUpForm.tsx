@@ -19,7 +19,7 @@ import toast, { Toaster } from "react-hot-toast";
 import axios, { AxiosError } from "axios";
 import { CreateUserPayload, CreateUserValidator } from "@/lib/validators/user";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next-nprogress-bar"
 
 const SignUpForm = () => {
   const router = useRouter();

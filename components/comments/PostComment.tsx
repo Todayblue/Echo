@@ -7,7 +7,7 @@ import { Comment, CommentVote, User } from "@prisma/client";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { MessageSquare } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next-nprogress-bar"
 import { FC, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "../ui/button";

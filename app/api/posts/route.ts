@@ -4,77 +4,43 @@ import {Session} from "next-auth";
 import {getAuthSession} from "@/lib/auth";
 import {PostValidator} from "@/lib/validators/post";
 import {generateSlug} from "@/lib/slugtify";
-
-const validateParams = async (req: Request) => {
-  const url = new URL(req.url);
-
-  const params = await z
-    .object({
-      limit: z.string(),
-      page: z.string(),
-      community: z.string().nullish().optional(),
-    })
-    .parse({
-      community: url.searchParams.get("community"),
-      limit: url.searchParams.get("limit"),
-      page: url.searchParams.get("page"),
-    });
-
-  return params;
-};
-
-const getPostsWhereClause = async (
-  session: Session | null,
-  community: string | null | undefined
-) => {
-  let whereClause = {};
-
-  if (community) {
-    whereClause = {
-      community: {
-        slug: community,
-      },
-    };
-  } else if (session) {
-    const followedcommunityIds = await prisma.subscription
-      .findMany({
-        where: {
-          userId: session.user.id,
-        },
-        include: {
-          community: true,
-        },
-      })
-      .then((sub) => sub.map((sub) => sub.communityId));
-
-    whereClause = {
-      community: {
-        id: {
-          in: followedcommunityIds,
-        },
-      },
-    };
-  }
-
-  return whereClause;
-};
+import {getSortByPosts, getTimeRange} from "@/lib/utils";
+import {calSkip} from "@/lib/calSkip";
+import {getSortBy} from "@/lib/utils";
+import {SearchPostParams} from "@/types";
 
 export async function GET(req: Request) {
-  const params = await validateParams(req);
-  const session = await getAuthSession();
-  const whereClause = await getPostsWhereClause(session, params.community);
+  const url = new URL(req.url);
+  const searchParams: SearchPostParams = {
+    community: url.searchParams.get("community") || "",
+    limit: Number(url.searchParams.get("limit") || 5),
+    page: Number(url.searchParams.get("page") || 1),
+    time: url.searchParams.get("time") as
+      | "year"
+      | "month"
+      | "week"
+      | "day"
+      | "hour"
+      | null,
+    sort: url.searchParams.get("sort") as "new" | "comments" | "votes" | null,
+  };
+  const {page, limit, community, time, sort} = searchParams;
+  const skip = calSkip(page, limit);
+  const {start, end} = getTimeRange(time);
+  const {sortBy, whereClause} = getSortByPosts(community, sort, start, end);
 
   const posts = await prisma.post.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
+    where: whereClause,
     include: {
       community: true,
+      comments: true,
       votes: true,
       author: true,
-      comments: true,
+      _count: true,
     },
-    where: whereClause,
+    skip,
+    take: limit,
+    orderBy: sortBy,
   });
 
   return new Response(JSON.stringify(posts));
@@ -89,19 +55,18 @@ export async function POST(req: Request) {
     const {title, content, communityId, imageUrl, videoUrl, latlong} =
       PostValidator.parse(body);
 
-    let latitude = 0;
-    let longitude = 0;
-
     if (!session?.user) {
       return new Response("Unauthorized", {status: 401});
     }
 
+    let latitude = "";
+    let longitude = "";
+
     if (latlong != null && latlong.length > 0) {
       const latlongSplit = latlong.split(",");
-      latitude = Number(latlongSplit[0]);
-      longitude = Number(latlongSplit[1]);
+      latitude = latlongSplit[0];
+      longitude = latlongSplit[1];
     }
-
 
     // verify user is subscribed to passed communityId id
     const subscription = await prisma.subscription.findFirst({
@@ -127,7 +92,7 @@ export async function POST(req: Request) {
         imageUrl: imageUrl,
         videoUrl: videoUrl,
         latitude: latitude,
-        longitude: latitude,
+        longitude: longitude,
         slug: generateSlug(title),
       },
       include: {
@@ -141,9 +106,6 @@ export async function POST(req: Request) {
       return new Response(error.message, {status: 400});
     }
 
-    return new Response(
-      "Could not post to subreddit at this time. Please try later",
-      {status: 500}
-    );
+    return new Response("error", {status: 500});
   }
 }

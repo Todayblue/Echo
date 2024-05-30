@@ -30,6 +30,17 @@ Table Session {
   user User [not null]
 }
 
+Table Notification {
+  id Int [pk, increment]
+  userId String [not null]
+  message String [not null]
+  herf String
+  isRead Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  user User [not null]
+}
+
 Table User {
   id String [pk]
   name String
@@ -40,6 +51,7 @@ Table User {
   dateOfBirth DateTime
   role Role [not null, default: 'USER']
   image String
+  emailVerified DateTime
   accounts Account [not null]
   Comment Comment [not null]
   CommentVote CommentVote [not null]
@@ -51,16 +63,17 @@ Table User {
   Session Session [not null]
   Blog Blog [not null]
   Tag Tag [not null]
+  notifications Notification [not null]
 }
 
 Table Community {
   id String [pk]
-  slug String
+  slug String [unique]
   name String [unique, not null]
   title String
   description String
   profileImage String
-  coverImage String
+  isActive Boolean [default: false]
   createdAt DateTime [default: `now()`]
   updatedAt DateTime
   creatorId String [not null]
@@ -84,13 +97,16 @@ Table Subscription {
 
 Table Post {
   id String [pk]
-  slug String
+  slug String [unique]
   title String [not null]
   content String
   imageUrl String
+  videoUrl String
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   authorId String [not null]
+  latitude String
+  longitude String
   communityId String [not null]
   votes Vote [not null]
   comments Comment [not null]
@@ -187,6 +203,8 @@ Enum VoteType {
 Ref: Account.userId > User.id [delete: Cascade]
 
 Ref: Session.userId > User.id [delete: Cascade]
+
+Ref: Notification.userId > User.id
 
 Ref: Community.creatorId > User.id
 

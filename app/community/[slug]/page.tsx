@@ -1,11 +1,12 @@
 import SubscribeLeaveToggle from "@/components/SubscribeLeaveToggle";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { LIMIT_POST } from "@/lib/constants";
-import { getAuthSession } from "@/lib/auth";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {Input} from "@/components/ui/input";
+import {LIMIT_POST} from "@/lib/constants";
+import {getAuthSession} from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import {notFound} from "next/navigation";
+import {ScrollArea} from "@/components/ui/scroll-area";
 
 import RuleList from "@/components/community/rule/RuleList";
 import AboutCommunity from "@/components/community/comment/AboutCommunity";
@@ -22,10 +23,13 @@ type communityOption = {
 };
 
 const getcommunity = async (slug: string, option: communityOption = {}) => {
-  const { page = 1, limit = LIMIT_POST } = option;
+  const {page = 1, limit = LIMIT_POST} = option;
 
   const community = await prisma.community.findFirst({
-    where: { slug },
+    where: {
+      slug: slug,
+      isActive: true,
+    },
     include: {
       rule: true,
       posts: {
@@ -35,7 +39,7 @@ const getcommunity = async (slug: string, option: communityOption = {}) => {
           comments: true,
           community: true,
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: {createdAt: "desc"},
         take: limit,
       },
     },
@@ -44,7 +48,7 @@ const getcommunity = async (slug: string, option: communityOption = {}) => {
   return community;
 };
 
-const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
+const Page = async ({params: {slug}}: {params: {slug: string}}) => {
   const session = await getAuthSession();
   const community = await getcommunity(slug);
 
@@ -83,13 +87,12 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
   });
 
   return (
-    <>
-      {/* bg */}
-      <div className=" ">
+    <ScrollArea className="h-full px-52 pt-6">
+      <div className="">
         <div className="bg-sky-500 h-20"></div>
       </div>
       <div className="relative w-full h-24 py-3 bg-white border border-b-gray-200">
-        <div className="mx-32">
+        <div className="mx-6">
           <div className="absolute -top-2 ">
             <CommunityAvatar
               className="w-24 h-24"
@@ -115,39 +118,26 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
           {/* text */}
         </div>
       </div>
+      <div className="grid mx-auto grid-cols-6 gap-x-6 py-6 w-full">
+        <div className="col-span-4 space-y-4">
+          <PostsFeed initPosts={community.posts} communitySlug={slug} />
+        </div>
 
-      {/* content */}
-      <div className="grid  min-h-screen bg-secondary">
-        <div className="grid  mx-auto w-4/5 grid-cols-6 gap-x-6 py-6">
-          {/* <ToFeedButton /> */}
-
-          <div className="col-span-4 space-y-4">
-            <div className="flex flex-row space-x-3 p-2 w-full border border-gray-300 rounded-md bg-white">
-              <Avatar className="flex flex-none">
-                <AvatarImage src={session?.user.image} />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-              <Link className="w-full" href={`/community/${slug}/post/create`}>
-                <Input placeholder="Create Post..." />
-              </Link>
+        <div className="col-span-2 space-y-4 ">
+          <div className="sticky top-0">
+            <div className="overflow-y-auto max-h-screen">
+              <div className="grid gap-4 ">
+                <AboutCommunity
+                  community={community}
+                  memberCount={memberCount}
+                />
+                <RuleList community={community} rules={rules} />
+              </div>
             </div>
-            <PostsFeed initPosts={community.posts} communitySlug={slug} />
-          </div>
-
-          {/* info sidebar */}
-          <div className="col-span-2  space-y-4">
-            <AboutCommunity
-              community={community}
-              memberCount={memberCount}
-            />
-            <RuleList
-              community={community}
-              rules={rules}
-            />
           </div>
         </div>
       </div>
-    </>
+    </ScrollArea>
   );
 };
 

@@ -1,7 +1,7 @@
-import { getAuthSession } from "@/lib/auth";
+import {getAuthSession} from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { RuleValidator } from "@/lib/validators/rule";
-import { NextResponse } from "next/server";
+import {RuleValidator} from "@/lib/validators/rule";
+import {NextResponse} from "next/server";
 
 export async function GET() {
   try {
@@ -10,8 +10,8 @@ export async function GET() {
     return NextResponse.json(rules);
   } catch (error) {
     return NextResponse.json(
-      { message: "Could not Rules", error },
-      { status: 500 }
+      {message: "Could not Rules", error},
+      {status: 500}
     );
   }
 }
@@ -21,16 +21,18 @@ export async function POST(request: Request) {
     const body = await request.json();
     const session = await getAuthSession();
 
-    const { title, description, communityId } = RuleValidator.parse(body);
+    const {title, description, communityId} = RuleValidator.parse(body);
 
-        const community = await prisma.community.findFirst({
+    const community = await prisma.community.findFirst({
       where: {
-        id: communityId
-      }
-    })
+        id: communityId,
+      },
+    });
 
     if (session?.user.id !== community?.creatorId) {
-      return new Response("Only created this community can create rules!!", { status: 401 });
+      return new Response("Only created this community can create rules!!", {
+        status: 401,
+      });
     }
 
     const rule = await prisma.rule.create({

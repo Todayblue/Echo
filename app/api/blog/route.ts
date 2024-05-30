@@ -1,15 +1,20 @@
-import { getAuthSession } from "@/lib/auth";
-import { calSkip } from "@/lib/calSkip";
+import {getAuthSession} from "@/lib/auth";
+import {calSkip} from "@/lib/calSkip";
 import prisma from "@/lib/prisma";
-import { BlogValidator } from "@/lib/validators/blog/blog";
-import { NextResponse } from "next/server";
-import { type NextRequest } from "next/server";
+import { generateSlug } from "@/lib/slugtify";
+import {BlogValidator} from "@/lib/validators/blog/blog";
+import {NextResponse} from "next/server";
+import {type NextRequest} from "next/server";
 
-async function getBlogs(tagId:string | null, skip:number, parsedLimit:number) {
+async function getBlogs(
+  tagId: string | null,
+  skip: number,
+  parsedLimit: number
+) {
   let whereCondition = {};
 
   if (tagId) {
-    let id = parseInt(tagId)
+    let id = parseInt(tagId);
     whereCondition = {
       tags: {
         some: {
@@ -34,7 +39,7 @@ async function getBlogs(tagId:string | null, skip:number, parsedLimit:number) {
     }),
   ]);
 
-  return { blogs, blogCount };
+  return {blogs, blogCount};
 }
 
 export async function GET(request: NextRequest) {
@@ -52,47 +57,35 @@ export async function GET(request: NextRequest) {
     const parsedLimit = parseInt(limit);
     const skip = calSkip(parsedPage, parsedLimit);
 
-    const { blogs, blogCount } = await getBlogs(
-      tagId,
-      skip,
-      parsedLimit
-    );
+    const {blogs, blogCount} = await getBlogs(tagId, skip, parsedLimit);
 
     return NextResponse.json(
-      { message: "GET Blog successfully", blogCount, blogs },
-      { status: 200 }
+      {message: "GET Blog successfully", blogCount, blogs},
+      {status: 200}
     );
   } catch (error) {
-    return NextResponse.json(
-      { message: "Can't GET Blog", error },
-      { status: 500 }
-    );
+    return NextResponse.json({message: "Can't GET Blog", error}, {status: 500});
   }
 }
-
 
 export async function POST(request: Request) {
   const session = await getAuthSession();
   try {
-
-  if (!session?.user) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+    if (!session?.user) {
+      return new Response("Unauthorized", {status: 401});
+    }
     const body = await request.json();
-    const { title, content, coverImage, tagSlugs } = BlogValidator.parse(body);
-
-    const slugify = require("slugify");
-    const blogSlug: string = slugify(title).toLowerCase();
+    const {title, content, coverImage, tagIds} = BlogValidator.parse(body);
 
     const posts = await prisma.blog.create({
       data: {
         title: title,
-        slug: blogSlug,
+        slug: generateSlug(title),
         content: content,
         coverImage: coverImage,
         authorId: session.user.id,
         tags: {
-          connect: tagSlugs.map((slug: any) => ({ slug })),
+          connect: tagIds.map((tag) => ({id: tag})),
         },
       },
       include: {
@@ -100,13 +93,13 @@ export async function POST(request: Request) {
       },
     });
     return NextResponse.json(
-      { message: "POST Blog successfully", posts },
-      { status: 200 }
+      {message: "POST Blog successfully", posts},
+      {status: 200}
     );
   } catch (error) {
     return NextResponse.json(
-      { message: "Can not POST Blog", error },
-      { status: 500 }
+      {message: "Can not POST Blog", error},
+      {status: 500}
     );
   }
 }

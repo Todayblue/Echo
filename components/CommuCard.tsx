@@ -25,30 +25,33 @@ export function CommuCard({
   ...props
 }: CommuCardProps) {
   return (
-    <div className={cn("space-y-3 py-3", className)} {...props}>
-      <ContextMenu>
-        <ContextMenuTrigger>
-          <div className="overflow-hidden rounded-md">
-            <Link href={`community/${communitySlug}`}>
-              <Image
-                src={profileImage || ""}
-                alt={name}
-                width={width}
-                height={height}
-                className={cn(
-                  "object-cover transition-all hover:scale-105",
-                  aspectRatio === "portrait" ? "aspect-[3/4]" : "aspect-square"
-                )}
-              />
-            </Link>
-          </div>
-        </ContextMenuTrigger>
-      </ContextMenu>
-      <div className="space-y-1 text-sm">
-        <h3 className="font-extrabold text-gray-800 leading-none text-center capitalize text-clip overflow-hidden ">
-          {name}
-        </h3>
+    <div
+      className={cn(
+        "flex flex-col items-center space-y-2 py-3 w-full",
+        className
+      )}
+      {...props}
+    >
+      <div
+        className="overflow-hidden rounded-md w-full"
+        style={{width, height}}
+      >
+        <Link href={`community/${communitySlug}`}>
+          <Image
+            src={profileImage || ""}
+            alt={name}
+            width={width}
+            height={height}
+            className={cn(
+              "object-cover transition-all hover:scale-105 w-full h-full",
+              aspectRatio === "portrait" ? "aspect-[3/4]" : "aspect-square"
+            )}
+          />
+        </Link>
       </div>
+      <h3 className="text-xs text-gray-600 truncate w-full text-center">
+        {name}
+      </h3>
     </div>
   );
 }

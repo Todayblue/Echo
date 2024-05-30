@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
     const community = await prisma.community.findFirstOrThrow({
       where: {
         id: id,
+        isActive: true,
       },
       include: {
         rule: true,

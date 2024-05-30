@@ -4,7 +4,6 @@ import Link from "next/link";
 import React from "react";
 import {format} from "date-fns";
 import {Community, Rule, Subscription} from "@prisma/client";
-import {getSession} from "next-auth/react";
 import {Card} from "@/components/ui/card";
 
 type CommunityDetails = {

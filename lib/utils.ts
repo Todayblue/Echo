@@ -1,6 +1,6 @@
-import { type ClassValue, clsx } from "clsx";
-import { formatDistanceToNowStrict } from "date-fns";
-import { twMerge } from "tailwind-merge";
+import {type ClassValue, clsx} from "clsx";
+import {formatDistanceToNowStrict} from "date-fns";
+import {twMerge} from "tailwind-merge";
 import locale from "date-fns/locale/th";
 
 export function cn(...inputs: ClassValue[]) {
@@ -54,3 +54,137 @@ export function formatTimeToNow(date: Date): string {
     },
   });
 }
+
+export const getTimeRange = (time: string | null | undefined): {start: Date; end: Date} => {
+  const now = new Date();
+  switch (time) {
+    case "year":
+      return {
+        start: new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()),
+        end: now,
+      };
+    case "month":
+      return {
+        start: new Date(now.getFullYear(), now.getMonth() - 1, 1),
+        end: now,
+      };
+    case "week":
+      return {
+        start: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+        end: now,
+      };
+    case "day":
+      return {
+        start: new Date(now.getTime() - 24 * 60 * 60 * 1000),
+        end: now,
+      };
+    case "hour":
+      return {
+        start: new Date(now.getTime() - 60 * 60 * 1000),
+        end: now,
+      };
+    default:
+      return {start: new Date(0), end: now};
+  }
+};
+
+export const getSortBy = (
+  sort: string | null | undefined,
+  query: string,
+  start: Date,
+  end: Date
+) => {
+  let sortBy = {};
+  let whereClause = {
+    title: { search: query, mode: "insensitive" },
+    createdAt: {gte: start, lte: end},
+    votes: {},
+  };
+  switch (sort) {
+    case "relevance":
+      sortBy = {
+        _relevance: {
+          fields: ["title"],
+          search: query,
+          sort: "asc",
+        },
+      };
+      break;
+    case "new":
+      sortBy = {
+        createdAt: "desc",
+      };
+      break;
+    case "comments":
+      sortBy = {
+        comments: {
+          _count: "desc",
+        },
+      };
+      break;
+    case "votes":
+      sortBy = {
+        votes: {
+          _count: "desc",
+        },
+      };
+      whereClause = {
+        title: {search: query, mode: "insensitive"},
+        createdAt: {gte: start, lte: end},
+        votes: {
+          every: {
+            type: "UP",
+          },
+        },
+      };
+      break;
+    default:
+      break;
+  }
+  return {sortBy, whereClause};
+};
+
+export const getSortByPosts = (
+  community: string | null | undefined,
+  sort: string | null | undefined,
+  start: Date,
+  end: Date
+) => {
+  let sortBy = {};
+  let whereClause: any = {};
+
+  if (community) {
+    whereClause.community = { slug: community };
+  }
+  whereClause.createdAt = { gte: start, lte: end };
+
+  switch (sort) {
+    case "new":
+      sortBy = {
+        createdAt: "desc",
+      };
+      break;
+    case "comments":
+      sortBy = {
+        comments: {
+          _count: "desc",
+        },
+      };
+      break;
+    case "votes":
+      sortBy = {
+        votes: {
+          _count: "desc",
+        },
+      };
+      whereClause.votes = {
+        every: {
+          type: "UP",
+        },
+      };
+      break;
+    default:
+      break;
+  }
+  return { sortBy, whereClause };
+};

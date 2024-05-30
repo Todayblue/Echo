@@ -1,7 +1,7 @@
 "use client";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import Image from "next/image";
-import {UploadDropzone} from "@/components/community/Uploadthing";
+import {UploadDropzone} from "@/components/Uploadthing";
 import {useState} from "react";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
@@ -124,6 +124,7 @@ const PostForm = ({
       /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
 
     const latLongValue = form.getValues("latlong") || "";
+
     const isValidFormat = latLongRegex.test(latLongValue);
 
     let googleMapsUrl: string;
@@ -304,7 +305,7 @@ const PostForm = ({
                     endpoint="mediaPost"
                     onClientUploadComplete={handleUploadComplete}
                     onUploadError={(error: Error) => {
-                      alert("Error");
+                      alert(`Error ${error}`);
                     }}
                   />
                 )}

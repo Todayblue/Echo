@@ -4,6 +4,7 @@ import {getAuthSession} from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import {Suspense} from "react";
 import {redirect} from "next/navigation";
+import {ScrollArea} from "@/components/ui/scroll-area";
 
 export default async function Layout({
   children,
@@ -24,6 +25,7 @@ export default async function Layout({
 
   const userCommunity = await prisma.community.findMany({
     where: {
+      isActive: true,
       subscribers: {
         some: {
           userId: session.user.id,
@@ -33,16 +35,14 @@ export default async function Layout({
   });
 
   return (
-    <div className="grid ">
-      <div className="bg-secondary min-h-screen">
-        <div className="pt-2 ">
-          <UserTabs user={user} />
-        </div>
-        <div className="grid grid-cols-6 mx-32 gap-x-6 py-4">
-          <div className="col-span-4">{children}</div>
-            <UserCard user={user} userCommunity={userCommunity} />
-        </div>
+    <ScrollArea className="h-full ">
+      <div className="pt-2 ">
+        <UserTabs user={user} />
       </div>
-    </div>
+      <div className="grid grid-cols-6 mx-32 gap-x-6 py-4">
+        <div className="col-span-4">{children}</div>
+        <UserCard user={user} userCommunity={userCommunity} />
+      </div>
+    </ScrollArea>
   );
 }

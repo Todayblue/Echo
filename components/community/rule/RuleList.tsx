@@ -11,7 +11,7 @@ import {Pencil, Trash} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
 import {AlertDialogDelete} from "./AlertDialogDelete";
-import {Rule, Community} from "@prisma/client";
+import {Rule, Community, Role} from "@prisma/client";
 import {useSession} from "next-auth/react";
 import {Card} from "@/components/ui/card";
 
@@ -48,32 +48,33 @@ const RuleList = ({community, rules}: Props) => {
                 </AccordionTrigger>
                 <AccordionContent>
                   <AccordionContent>{rule.description}</AccordionContent>
-                  {/* {communityCreatorId === session?.user?.id && (
+                  {(community?.creatorId === session?.user?.id ||
+                    session?.user.role === Role.ADMIN) && (
                     <div className="flex flex-row space-x-2 justify-end mx-2">
                       <Button variant="outline" size="icon">
                         <Link
-                          href={`/community/${communitySlug}/rule/edit/${rule.id}`}
+                          href={`/community/${community?.slug}/rule/edit/${rule.id}`}
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
                       <AlertDialogDelete
-                        session={session}
-                        communitySlug={communitySlug}
+                        communitySlug={community?.slug || ""}
                         ruleId={rule.id}
                       />
                     </div>
-                  )} */}
+                  )}
                 </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
         )}
-        {/* {communityCreatorId === session?.user?.id && (
-        )} */}
-        <Link href={`/community/${community?.slug}/rule/create`}>
-          <Button className="w-full">Create Rules</Button>
-        </Link>
+        {(community?.creatorId === session?.user?.id ||
+          session?.user.role === Role.ADMIN) && (
+          <Link href={`/community/${community?.slug}/rule/create`}>
+            <Button className="w-full">Create Rules</Button>
+          </Link>
+        )}
       </dl>
     </Card>
   );

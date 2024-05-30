@@ -1,13 +1,13 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { SubscribeToCommunityPayload } from "@/lib/validators/communitySubscription";
-import { useMutation } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import {Button} from "@/components/ui/button";
+import {SubscribeToCommunityPayload} from "@/lib/validators/communitySubscription";
+import {useMutation} from "@tanstack/react-query";
+import axios, {AxiosError} from "axios";
 import {useRouter} from "next/navigation";
-import { startTransition } from "react";
-import { useToast } from "../hooks/use-toast";
-import { useCustomToasts } from "@/hooks/use-custom-toasts";
-import { useSession } from "next-auth/react";
+import {startTransition} from "react";
+import {useToast} from "../hooks/use-toast";
+import {useCustomToasts} from "@/hooks/use-custom-toasts";
+import {useSession} from "next-auth/react";
 
 interface SubscribeLeaveToggleProps {
   isSubscribed: boolean;
@@ -20,18 +20,18 @@ const SubscribeLeaveToggle = ({
   communityId,
   communityName,
 }: SubscribeLeaveToggleProps) => {
-  const { toast } = useToast();
-  const { loginToast } = useCustomToasts();
+  const {toast} = useToast();
+  const {loginToast} = useCustomToasts();
   const router = useRouter();
-  const { data: session } = useSession();
+  const {data: session} = useSession();
 
-  const { mutate: subscribe, isPending: isSubLoading } = useMutation({
+  const {mutate: subscribe, isPending: isSubLoading} = useMutation({
     mutationFn: async () => {
       const payload: SubscribeToCommunityPayload = {
         communityId,
       };
 
-      const { data } = await axios.post("/api/community/subscribe", payload);
+      const {data} = await axios.post("/api/community/subscribe", payload);
       return data as string;
     },
     onError: (err) => {
@@ -55,18 +55,18 @@ const SubscribeLeaveToggle = ({
       });
       toast({
         title: "Subscribed!",
-        description: `You are now subscribed to r/${communityName}`,
+        description: `You are now subscribed to ${communityName}`,
       });
     },
   });
 
-  const { mutate: unsubscribe, isPending: isUnsubLoading } = useMutation({
+  const {mutate: unsubscribe, isPending: isUnsubLoading} = useMutation({
     mutationFn: async () => {
       const payload: SubscribeToCommunityPayload = {
         communityId,
       };
 
-      const { data } = await axios.post("/api/community/unsubscribe", payload);
+      const {data} = await axios.post("/api/community/unsubscribe", payload);
       return data as string;
     },
     onError: (err: AxiosError) => {

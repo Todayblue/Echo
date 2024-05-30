@@ -84,7 +84,10 @@ const UserVotes = ({initPosts, voteType}: UserVoteProps) => {
                 author={post.author.name}
                 title={post.title}
                 content={post.content}
+                commentsCount={post.comments.length}
                 createdAt={post.createdAt}
+                communityImg={post.community.profileImage}
+                comunityName={post.community.name}
                 votesAmt={votesAmt}
                 currentVote={currentVote}
               />
@@ -99,7 +102,10 @@ const UserVotes = ({initPosts, voteType}: UserVoteProps) => {
               image={post.imageUrl}
               commu={post.community.name}
               author={post.author.name}
+              communityImg={post.community.profileImage}
+              comunityName={post.community.name}
               title={post.title}
+              commentsCount={post.comments.length}
               content={post.content}
               createdAt={post.createdAt}
               votesAmt={votesAmt}

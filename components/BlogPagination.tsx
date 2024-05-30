@@ -1,5 +1,5 @@
 import { BLOG_ITEM_PER_PAGE } from "../lib/constants";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next-nprogress-bar"
 import {
   Pagination,
   PaginationContent,

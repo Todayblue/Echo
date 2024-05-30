@@ -1,17 +1,22 @@
-import prisma from '@/lib/prisma'
+import prisma from "@/lib/prisma";
 
 export async function GET(req: Request) {
-  const url = new URL(req.url)
-  const q = url.searchParams.get('q')
+  const url = new URL(req.url);
+  const q = url.searchParams.get("q");
 
-  if (!q) return new Response('Invalid query', { status: 400 })
+  if (!q) return new Response("Invalid query", {status: 400});
+
+  const searchTerms = q.split(" ");
 
   const results = await prisma.community.findMany({
     where: {
-      name: {
-        startsWith: q,
-        mode: "insensitive",
-      },
+      isActive: true,
+      OR: searchTerms.map((term) => ({
+        slug: {
+          contains: term,
+          mode: "insensitive",
+        },
+      })),
     },
     include: {
       _count: true,
@@ -19,5 +24,5 @@ export async function GET(req: Request) {
     take: 5,
   });
 
-  return new Response(JSON.stringify(results))
+  return new Response(JSON.stringify(results));
 }
