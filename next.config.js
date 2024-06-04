@@ -1,5 +1,6 @@
 // next.config.js
 const nextConfig = {
+  reactStrictMode: false,
   compiler: {
     // Enables the styled-components SWC transform
     styledComponents: true,
@@ -16,6 +17,14 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "images.unsplash.com",
+      },
+      {
+        hostname: "avatar.vercel.sh",
+        port: "",
+      },
+      {
+        hostname: "utfs.io",
+        port: "",
       },
     ],
   },

@@ -1,118 +1,150 @@
 "use client";
 
-import { LIMIT_POST } from "@/lib/constants";
-import { useIntersection } from "@mantine/hooks";
-import { Comment, Post, Community, User, Vote } from "@prisma/client";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {LIMIT_POST} from "@/lib/constants";
+import {useIntersection} from "@mantine/hooks";
+import {Comment, Post, Community, User, Vote} from "@prisma/client";
+import {useInfiniteQuery} from "@tanstack/react-query";
 import axios from "axios";
-import { Loader2 } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { useEffect, useRef } from "react";
+import {Frown, Loader2} from "lucide-react";
+import {useSession} from "next-auth/react";
+import {useEffect, useRef, useState} from "react";
 import PostCard from "./community/PostCard";
-
-type ExtendedPost = Post & {
-  community: Community;
-  votes: Vote[];
-  author: User;
-  comments: Comment[];
-};
+import {useInView} from "react-intersection-observer";
+import PostLoading from "./loading/PostLoading";
+import {ExtendedPost} from "@/types";
+import {getPosts} from "@/services/common";
+import SelectFilterTabs from "./SelectFilterTabs";
 
 type PostsFeedProps = {
   initPosts: ExtendedPost[];
   communitySlug?: string;
 };
 
-const PostsFeed = ({ initPosts, communitySlug }: PostsFeedProps) => {
-  const { data: session } = useSession();
+const sortTimeoptions = [
+  {value: "all", label: "All Time"},
+  {value: "year", label: "Past Year"},
+  {value: "month", label: "Past Month"},
+  {value: "week", label: "Past Week"},
+  {value: "day", label: "Past 24 Hours"},
+  {value: "hour", label: "Past Hour"},
+];
 
-  const lastPostRef = useRef<HTMLElement>(null);
-  const { ref, entry } = useIntersection({
-    root: lastPostRef.current,
-    threshold: 1,
-  });
+const sortOptions = [
+  {value: "new", label: "Newest"},
+  {value: "comments", label: "Most Comments"},
+  {value: "votes", label: "Most Votes"},
+];
 
-  const fetchPosts = async ({ pageParam = 1 }) => {
-    const query =
-      `/api/posts?limit=${LIMIT_POST}&page=${pageParam}` +
-      (!!communitySlug ? `&community=${communitySlug}` : "");
+const PostsFeed = ({initPosts, communitySlug}: PostsFeedProps) => {
+  const [time, setTime] = useState<string>("all");
+  const [sort, setSort] = useState<string>(communitySlug ? "new" : "relevance");
+  const {data: session} = useSession();
+  const {ref, inView} = useInView();
 
-    const { data } = await axios.get(query);
-
-    return data as ExtendedPost[];
-  };
-
-  const { data, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: ["projects"],
-    queryFn: fetchPosts,
+  const {
+    data: queryResults,
+    status,
+    fetchNextPage,
+    isPending,
+    isFetchingNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["search", time, sort],
+    queryFn: ({pageParam}) =>
+      getPosts(pageParam, communitySlug || "", time || "", sort || ""),
     initialPageParam: 1,
-    getNextPageParam: (_, pages) => pages.length + 1,
-    initialData: { pages: [initPosts], pageParams: [1] },
+    getNextPageParam: (lastPage, allPages) => {
+      const nextPage = lastPage.length ? allPages.length + 1 : undefined;
+      return nextPage;
+    },
   });
 
   useEffect(() => {
-    if (entry?.isIntersecting) {
-      fetchNextPage(); // Load more posts when the last post comes into view
+    if (inView && hasNextPage) {
+      fetchNextPage();
     }
-  }, [entry, fetchNextPage]);
+  }, [inView, hasNextPage, fetchNextPage]);
 
-  const posts = data.pages.flatMap((page: any) => page) ?? initPosts;
+  const handleSelectTime = (value: string) => {
+    setTime(value);
+  };
+
+  const handleSelectSort = (value: string) => {
+    setSort(value);
+  };
+
+  const posts = queryResults?.pages.flatMap((page: any) => page) ?? initPosts;
 
   return (
-    <ul className="flex flex-col gap-y-2">
-      {posts.map((post: ExtendedPost, idx: number) => {
-        const votesAmt = post.votes.reduce((acc, vote) => {
-          if (vote.type === "UP") return acc + 1;
-          if (vote.type === "DOWN") return acc - 1;
-          return acc;
-        }, 0);
+    <>
+      <div>
+        <SelectFilterTabs
+          handleSelectTime={handleSelectTime}
+          handleSelectSort={handleSelectSort}
+          sortTimeoptions={sortTimeoptions}
+          sortOptions={sortOptions}
+        />
+      </div>
+      {posts.length > 0 ? (
+        <ul className="flex flex-col gap-y-2">
+          {posts.map((post: ExtendedPost, idx: number) => {
+            const votesAmt = post.votes.reduce((acc, vote) => {
+              if (vote.type === "UP") return acc + 1;
+              if (vote.type === "DOWN") return acc - 1;
+              return acc;
+            }, 0);
 
-        const currentVote = post.votes.find(
-          (vote) => vote.userId === session?.user.id
-        );
+            const currentVote = post.votes.find(
+              (vote) => vote.userId === session?.user.id
+            );
 
-        if (idx === posts.length - 1) {
-          return (
-            <li key={post.id} ref={ref}>
-              <PostCard
-                key={post.id}
-                id={post.id}
-                slug={post.community.slug}
-                image={post.imageUrl}
-                commu={post.community.name}
-                author={post.author.name}
-                title={post.title}
-                content={post.content}
-                createdAt={post.createdAt}
-                votesAmt={votesAmt}
-                currentVote={currentVote}
-              />
+            return (
+              <li key={post.id} ref={ref}>
+                {status === "pending" ? (
+                  <PostLoading />
+                ) : (
+                  <PostCard
+                    id={post.id}
+                    slug={post.community.slug}
+                    image={post.imageUrl}
+                    commu={post.community.name}
+                    author={post.author.name}
+                    title={post.title}
+                    content={post.content}
+                    createdAt={post.createdAt}
+                    videoUrl={post.videoUrl}
+                    commentsCount={post.comments.length}
+                    comunityName={post.community.name}
+                    communityImg={post.community.profileImage}
+                    votesAmt={votesAmt}
+                    currentVote={currentVote}
+                    lat={post.latitude}
+                    lng={post.longitude}
+                  />
+                )}
+              </li>
+            );
+          })}
+
+          {isFetchingNextPage && (
+            <li className="flex justify-center">
+              <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
             </li>
-          );
-        } else {
-          return (
-            <PostCard
-              key={post.id}
-              id={post.id}
-              slug={post.community.slug}
-              image={post.imageUrl}
-              commu={post.community.name}
-              author={post.author.name}
-              title={post.title}
-              content={post.content}
-              createdAt={post.createdAt}
-              votesAmt={votesAmt}
-              currentVote={currentVote}
-            />
-          );
-        }
-      })}
-
-      {isFetchingNextPage && (
-        <li className="flex justify-center">
-          <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
-        </li>
+          )}
+        </ul>
+      ) : (
+        <div className="flex justify-center  space-x-2 p-4">
+          <div className="shrink-0">
+            <Frown />
+          </div>
+          <div>
+            <p className="text-slate-500 text-center">
+              No results found for posts.
+            </p>
+          </div>
+        </div>
       )}
-    </ul>
+    </>
   );
 };
 

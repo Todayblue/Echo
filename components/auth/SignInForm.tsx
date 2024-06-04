@@ -18,7 +18,7 @@ import GoogleSignInButton from "../GoogleSignInButton";
 import { CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { signIn } from "next-auth/react";
 import { LoginUserPayload, LoginUserValidator } from "@/lib/validators/user";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next-nprogress-bar"
 import toast, { Toaster } from "react-hot-toast";
 import { useState } from "react";
 

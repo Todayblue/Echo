@@ -1,27 +1,30 @@
 "use client";
 import React from "react";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import {useForm} from "react-hook-form";
+import {Button} from "@/components/ui/button";
+import {useRouter} from "next-nprogress-bar";
+import {useMutation} from "@tanstack/react-query";
+import {
+  Card,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import {
-  RuleUpdationRequest,
-  UpdateRuleValidator,
-} from "@/lib/validators/rule";
-import { Textarea } from "@/components/ui/textarea";
+import {Input} from "@/components/ui/input";
+import {RuleUpdationRequest, UpdateRuleValidator} from "@/lib/validators/rule";
+import {Textarea} from "@/components/ui/textarea";
 import axios from "axios";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "@/hooks/use-toast";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {toast} from "@/hooks/use-toast";
 
 type editeRuleProps = {
   community: {
@@ -41,7 +44,7 @@ type editeRuleProps = {
   };
 };
 
-export const UpdateRule = ({ community, rule }: editeRuleProps) => {
+export const UpdateRule = ({community, rule}: editeRuleProps) => {
   const router = useRouter();
 
   const form = useForm<RuleUpdationRequest>({
@@ -53,14 +56,14 @@ export const UpdateRule = ({ community, rule }: editeRuleProps) => {
   });
 
   const editCommunityRule = async (payload: RuleUpdationRequest) => {
-    const { data } = await axios.patch(
+    const {data} = await axios.patch(
       `/api/community/${community.slug}/rules/${rule.id}`,
       payload
     );
     return data;
   };
 
-  const { mutate: editeRule, isPending } = useMutation({
+  const {mutate: editeRule, isPending} = useMutation({
     mutationFn: (values: RuleUpdationRequest) => editCommunityRule(values),
     onError: (err) => {
       toast({
@@ -71,7 +74,7 @@ export const UpdateRule = ({ community, rule }: editeRuleProps) => {
     },
     onSuccess: () => {
       toast({
-        title: "The rule has been successfully updated. 🚀",
+        title: "success",
         variant: "default",
         duration: 2000,
       });
@@ -89,56 +92,53 @@ export const UpdateRule = ({ community, rule }: editeRuleProps) => {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 bg-white rounded-lg"
-      >
-        <div className="mx-auto px-4 ">
-          <div className="grid gap-6 pt-5">
-            <CardHeader className="capitalize ">
-              <CardTitle>Create </CardTitle>
-              <CardTitle>{community.name}/Rules</CardTitle>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Card className="mx-auto px-4">
+          <CardContent className="grid gap-4">
+            <CardHeader className="px-0">
+              <CardTitle>Edit Rule</CardTitle>
             </CardHeader>
-            <div className="grid gap-2">
-              <Label>Title</Label>
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input placeholder="Add a Title..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>Description</Label>
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Textarea placeholder="Add a Description..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-          <CardFooter className="justify-between space-x-2 py-10">
-            <Button variant="ghost" onClick={() => router.back()}>
+            <hr className="pt-4 border-gray-300 " />
+            <FormLabel>Title</FormLabel>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({field}) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Add a Title..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormLabel>Description</FormLabel>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({field}) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea
+                      className="h-32"
+                      placeholder="Add a Description..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+          <CardFooter className="justify-between">
+            <Button variant={"outline"} onClick={() => router.back()}>
               Cancel
             </Button>
             <Button isLoading={isPending} type="submit">
-              Update Rules
+              Save
             </Button>
           </CardFooter>
-        </div>
+        </Card>
       </form>
     </Form>
   );
