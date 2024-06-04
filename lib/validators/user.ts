@@ -35,7 +35,7 @@ export const UpdateUserValidator = z.object({
   username: z.string().optional(),
   bio: z.string().optional(),
   image: z.string().optional(),
-  dateOfBirth: z.date().optional(),
+  dateOfBirth: z.coerce.date().optional()
 });
 
 export type UpdateUserPayload = z.infer<typeof UpdateUserValidator>;

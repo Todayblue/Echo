@@ -1,45 +1,38 @@
-import { Button } from "@/components/ui/button";
+"use client";
+import {Button} from "@/components/ui/button";
 import Link from "next/link";
 import React from "react";
-import { format } from "date-fns";
+import {format} from "date-fns";
+import {Community, Rule, Subscription} from "@prisma/client";
+import {Card} from "@/components/ui/card";
 
-type AboutCommunityProp = {
+type CommunityDetails = {
+  community?: Community;
   memberCount: number;
-  createdAt: Date | null;
-  creatorId: string;
-  title: string | null;
-  description: string | null;
-  slug: string | null;
-  session: {
-    user: {
-      name: string;
-      email: string;
-      id: string;
-    };
-  } | null;
 };
 
 const AboutCommunity = ({
   memberCount,
-  creatorId,
-  createdAt,
-  slug,
-  title,
-  description,
-  session,
-}: AboutCommunityProp) => {
+  community,
+}: CommunityDetails) => {
   return (
-    <div className="w-screen md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
+    <Card className="order-first md:order-last">
       <div className="mx-6 pt-4 ">
-        <p className="font-semibold py-3 border-b border-gray-300 ">{title}</p>
-        <p className="pt-3 text-sm text-muted-foreground">{description}</p>
+        <p className="font-semibold py-3 border-b border-gray-300 ">
+          {community?.title}
+        </p>
+        <p className="pt-3 text-sm text-muted-foreground">
+          {community?.description}
+        </p>
       </div>
       <dl className="divide-y divide-gray-100 px-6 py-4 text-sm leading-4 ">
         <div className="flex justify-between gap-x-4 py-3">
           <dt className="text-gray-500">Created</dt>
           <dd className="text-gray-700">
-            <time dateTime={createdAt?.toDateString()}>
-              {createdAt ? format(createdAt, "MMMM d, yyyy") : "N/A"}
+            <time dateTime={community?.createdAt?.toString()}>
+              {community?.createdAt
+                ? format(community.createdAt, "MMMM d, yyyy")
+                : "N/A"}
             </time>
           </dd>
         </div>
@@ -49,16 +42,16 @@ const AboutCommunity = ({
             <div className="text-gray-900">{memberCount}</div>
           </dd>
         </div>
-        {creatorId === session?.user?.id ? (
+        {/* {creatorId ===  ? (
           <div className="flex justify-between gap-x-4 py-3">
             <dt className="text-gray-500">You created this community</dt>
           </div>
-        ) : null}
-        <Link href={`/community/${slug}/post/create`}>
+        ) : null} */}
+        <Link href={`/community/${community?.slug}/post/create`}>
           <Button className="w-full">Create Post</Button>
         </Link>
       </dl>
-    </div>
+    </Card>
   );
 };
 

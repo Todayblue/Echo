@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Trash } from "lucide-react";
+import {Trash} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,37 +11,31 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import {Button} from "@/components/ui/button";
+import {useRouter} from "next-nprogress-bar";
+import {useMutation} from "@tanstack/react-query";
 import axios from "axios";
-import { toast } from "@/hooks/use-toast";
+import {toast} from "@/hooks/use-toast";
 
 type AlertDialogDeleteProps = {
-  session: {
-    user: {
-      id: string;
-    };
-  };
   communitySlug: string | null;
   ruleId: string;
 };
 
 export const AlertDialogDelete = ({
-  session,
   communitySlug,
   ruleId,
 }: AlertDialogDeleteProps) => {
   const router = useRouter();
 
   const editCommunityRule = async () => {
-    const { data } = await axios.delete(
+    const {data} = await axios.delete(
       `/api/community/${communitySlug}/rules/${ruleId}`
     );
     return data;
   };
 
-  const { mutate: deleteRule, isPending } = useMutation({
+  const {mutate: deleteRule, isPending} = useMutation({
     mutationFn: () => editCommunityRule(),
     onError: (err) => {
       toast({
@@ -52,7 +46,7 @@ export const AlertDialogDelete = ({
     },
     onSuccess: () => {
       toast({
-        title: "The rule has been successfully deleted. 🚀",
+        title: "success",
         variant: "default",
         duration: 2000,
       });

@@ -7,54 +7,31 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Pencil, Trash } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {Pencil, Trash} from "lucide-react";
+import {Button} from "@/components/ui/button";
 import Link from "next/link";
-import { AlertDialogDelete } from "./AlertDialogDelete";
+import {AlertDialogDelete} from "./AlertDialogDelete";
+import {Rule, Community, Role} from "@prisma/client";
+import {useSession} from "next-auth/react";
+import {Card} from "@/components/ui/card";
 
-enum UserRole {
-  USER = "USER",
-  ADMIN = "ADMIN",
-}
-
-type RuleProps = {
-  rules: {
-    id: string;
-    title: string;
-    description: string;
-    authorId: string;
-    communityId: string;
-  }[];
-  session: {
-    user: {
-      name: string;
-      email: string;
-      image: string;
-      id: string;
-      role: UserRole;
-    };
-  } | null;
-  communityName: string;
-  communityCreatorId: string;
-  communitySlug: string | null;
+type Props = {
+  community: Community | undefined;
+  rules: Rule[] | undefined;
 };
 
-const RuleList = ({
-  session,
-  communityCreatorId,
-  communityName,
-  communitySlug,
-  rules,
-}: RuleProps) => {
+const RuleList = ({community, rules}: Props) => {
+  const {data: session, status} = useSession();
+
   return (
-    <div className="w-screen  md:w-full bg-white h-fit rounded-lg border border-gray-300 order-first md:order-last">
+    <Card className="order-first md:order-last">
       <div className="mx-6 pt-4 ">
         <p className="capitalize font-semibold py-3 border-b border-gray-300 ">
-          {communityName}/ Rules
+          {community?.name}/ Rules
         </p>
       </div>
       <dl className="divide-y divide-gray-100 px-6 py-4 text-sm leading-4 ">
-        {rules.length === 0 ? (
+        {rules?.length === 0 ? (
           <Accordion type="single" collapsible>
             <AccordionItem value="item-1">
               <AccordionTrigger>
@@ -64,25 +41,25 @@ const RuleList = ({
           </Accordion>
         ) : (
           <Accordion type="single" collapsible>
-            {rules.map((rule) => (
+            {rules?.map((rule) => (
               <AccordionItem value={rule.id} key={rule.id}>
                 <AccordionTrigger className="text-left">
                   {rule.title}
                 </AccordionTrigger>
                 <AccordionContent>
                   <AccordionContent>{rule.description}</AccordionContent>
-                  {communityCreatorId === session?.user?.id && (
+                  {(community?.creatorId === session?.user?.id ||
+                    session?.user.role === Role.ADMIN) && (
                     <div className="flex flex-row space-x-2 justify-end mx-2">
                       <Button variant="outline" size="icon">
                         <Link
-                          href={`/community/${communitySlug}/rule/edit/${rule.id}`}
+                          href={`/community/${community?.slug}/rule/edit/${rule.id}`}
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
                       <AlertDialogDelete
-                        session={session}
-                        communitySlug={communitySlug}
+                        communitySlug={community?.slug || ""}
                         ruleId={rule.id}
                       />
                     </div>
@@ -92,13 +69,14 @@ const RuleList = ({
             ))}
           </Accordion>
         )}
-        {communityCreatorId === session?.user?.id && (
-          <Link href={`/community/${communitySlug}/rule/create`}>
+        {(community?.creatorId === session?.user?.id ||
+          session?.user.role === Role.ADMIN) && (
+          <Link href={`/community/${community?.slug}/rule/create`}>
             <Button className="w-full">Create Rules</Button>
           </Link>
         )}
       </dl>
-    </div>
+    </Card>
   );
 };
 

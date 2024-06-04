@@ -1,13 +1,13 @@
 import React from "react";
-import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import {Tabs, TabsList, TabsTrigger} from "../ui/tabs";
 import Link from "next/link";
-import { Session, User } from "@prisma/client";
+import {Session, User} from "@prisma/client";
 
 type UserTabsProps = {
   user: User;
 };
 
-const UserTabs = ({ user }: UserTabsProps) => {
+const UserTabs = ({user}: UserTabsProps) => {
   return (
     <div className="">
       <Tabs className="w-full ">
@@ -23,6 +23,9 @@ const UserTabs = ({ user }: UserTabsProps) => {
           </TabsTrigger>
           <TabsTrigger value="downvoted">
             <Link href={`/user/${user.username}/downvote`}>DOWNVOTED</Link>
+          </TabsTrigger>
+          <TabsTrigger value="settings">
+            <Link href={`/user/${user.username}/settings`}>SETTING</Link>
           </TabsTrigger>
         </TabsList>
       </Tabs>

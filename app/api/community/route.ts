@@ -1,41 +1,45 @@
-import { getAuthSession } from "@/lib/auth";
+import {getAuthSession} from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { generateSlug } from "@/lib/slugtify";
-import { CommunityValidator } from "@/lib/validators/community";
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import {generateSlug} from "@/lib/slugtify";
+import {CommunityValidator} from "@/lib/validators/community";
+import {NextResponse} from "next/server";
+import {z} from "zod";
 
-// export async function GET() {
-//   try {
-//     const community = await prisma.community.findMany({
-//       include: {
-//         subscribers: {
-//           include: {
-//             user: true,
-//           },
-//         },
-//       },
-//     });
+export async function GET() {
+  try {
+    const community = await prisma.community.findMany({
+      where: {
+        isActive: true,
+      },
+      include: {
+        subscribers: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
 
-//     return NextResponse.json(community);
-//   } catch (error) {
-//     return NextResponse.json(
-//       { message: "Could not get community", error },
-//       { status: 500 }
-//     );
-//   }
-// }
+    return NextResponse.json(community);
+  } catch (error) {
+    return NextResponse.json(
+      {message: "Could not get community", error},
+      {status: 500}
+    );
+  }
+}
 
 export async function POST(req: Request) {
   const session = await getAuthSession();
 
   if (!session?.user) {
-    return new Response("Unauthorized", { status: 401 });
+    return new Response("Unauthorized", {status: 401});
   }
 
   try {
     const body = await req.json();
-    const { name,description,title,profileImage } = CommunityValidator.parse(body);
+    const {name, description, title, profileImage, isActive} =
+      CommunityValidator.parse(body);
 
     const slug = generateSlug(name);
 
@@ -47,7 +51,7 @@ export async function POST(req: Request) {
     });
 
     if (communityExists) {
-      return new Response("Community already exists", { status: 409 });
+      return new Response("Community already exists", {status: 409});
     }
 
     // create community and associate it with the user
@@ -59,6 +63,7 @@ export async function POST(req: Request) {
         title: title,
         description: description,
         creatorId: session.user.id,
+        isActive: isActive,
       },
     });
 
@@ -69,12 +74,11 @@ export async function POST(req: Request) {
         communityId: community.id,
       },
     });
-
-    return NextResponse.json(community.name);
+    return NextResponse.json(community.slug);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return new Response(error.message, { status: 422 });
+      return new Response(error.message, {status: 422});
     }
-    return new Response("Could not create community", { status: 500 });
+    return new Response("Could not create community", {status: 500});
   }
 }

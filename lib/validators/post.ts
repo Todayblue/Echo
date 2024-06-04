@@ -1,17 +1,25 @@
 import { z } from "zod";
 
+const latLongRegex =
+  /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
+
 export const PostValidator = z.object({
-  communityId: z.string({ required_error: "Please select community" }),
-  imageUrl: z.string().optional(),
+  communityId: z.string({required_error: "Please select community"}),
+  imageUrl: z.string().optional().nullable(),
+  videoUrl: z.string().optional().nullable(),
   title: z
-    .string({ required_error: "Please fill in post title" })
+    .string({required_error: "Please fill in post title"})
     .min(3, {
       message: "Title must be at least 3 characters long",
     })
-    .max(128, {
-      message: "Title must be less than 128 characters long",
+    .max(500, {
+      message: "Title must be less than 500 characters long",
     }),
   content: z.any(),
+  latlong: z
+    .string()
+    .regex(latLongRegex, {message: "Invalid latitude/longitude format"})
+    .optional(),
 });
 
 export const PostSchema = z.object({

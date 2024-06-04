@@ -1,13 +1,16 @@
+import {getAuthSession} from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { Blog, Tag } from "@prisma/client";
-import { NextResponse } from "next/server";
+import {generateSlug} from "@/lib/slugtify";
+import {BlogPayload, BlogValidator} from "@/lib/validators/blog/blog";
+import {Blog, Tag} from "@prisma/client";
+import {NextResponse} from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  {params}: {params: {slug: string}}
 ) {
   try {
-    const blogSlug = params.slug
+    const blogSlug = params.slug;
     const blog = await prisma.blog.findFirst({
       where: {
         slug: blogSlug,
@@ -18,63 +21,74 @@ export async function GET(
       },
     });
     return NextResponse.json(
-      { message: "GET Blog successfully", blog },
-      { status: 200 }
+      {message: "GET Blog successfully", blog},
+      {status: 200}
     );
   } catch (error) {
-    return NextResponse.json(
-      { message: "Can't GET Blog", error },
-      { status: 500 }
-    );
+    return NextResponse.json({message: "Can't GET Blog", error}, {status: 500});
   }
 }
 
-type ExtendedBlog = Blog & {
-  tags: Tag[]
-};
-
-export async function PUT(
+export async function PATCH(
   request: Request,
-  { params }: { params: { slug: string } }
+  {params}: {params: {slug: string}}
 ) {
   try {
-    const { title, content, coverImage, authorId, tags}: ExtendedBlog =
-      await request.json();
+    const session = await getAuthSession();
 
- const slugify = require("slugify");
- const blogSlug: string = slugify(title).toLowerCase();
+    if (!session?.user) {
+      return new Response("Unauthorized", {status: 401});
+    }
 
+    const body = await request.json();
+    const {title, content, coverImage, tagIds} = BlogValidator.parse(body);
 
+    const existingBlog = await prisma.blog.findUnique({
+      where: {
+        slug: params.slug,
+      },
+      include: {
+        tags: true,
+      },
+    });
+
+    let currentSlug =
+      existingBlog?.title !== title ? generateSlug(title) : params.slug;
+
+    // Determine tags to connect (new tags) and disconnect (removed tags)
+    const tagsToConnect = tagIds.filter(
+      (tagId) => !existingBlog?.tags.find((tag) => tag.id === tagId)
+    );
+    const tagsToDisconnect = existingBlog?.tags.filter(
+      (tag) => !tagIds.includes(tag.id)
+    );
+
+    // Update the blog post with both connect and disconnect operations
     const updateBlog = await prisma.blog.update({
       where: {
         slug: params.slug,
       },
       data: {
         title,
-        slug: blogSlug,
+        slug: currentSlug,
         content,
         coverImage,
-        authorId,
         tags: {
-          connect: tags.map((tag) => ({ id: tag.id })),
+          connect: tagsToConnect.map((tagId) => ({id: tagId})),
+          disconnect: tagsToDisconnect?.map((tag) => ({id: tag.id})),
         },
       },
     });
-    return NextResponse.json(
-      { message: "UPDATE Blog successfully", updateBlog },
-      { status: 200 }
-    );
+
+    return NextResponse.json({message: "Success", updateBlog}, {status: 200});
   } catch (error) {
-    return NextResponse.json(
-      { message: "Can't UPDATE Blog", error },
-      { status: 500 }
-    );
+    return NextResponse.json({message: "Fail", error}, {status: 500});
   }
 }
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { slug: string } }
+  {params}: {params: {slug: string}}
 ) {
   const blogSlug = params.slug;
   try {
@@ -83,14 +97,8 @@ export async function DELETE(
         slug: blogSlug,
       },
     });
-    return NextResponse.json(
-      { message: "DELETE Blog Successfully", deleteBlog },
-      { status: 200 }
-    );
+    return NextResponse.json({message: "Success", deleteBlog}, {status: 200});
   } catch (error) {
-    return NextResponse.json(
-      { message: "Can't DELETE Blog", error },
-      { status: 500 }
-    );
+    return NextResponse.json({message: "Fail", error}, {status: 500});
   }
 }

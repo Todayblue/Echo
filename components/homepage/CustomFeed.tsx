@@ -1,8 +1,8 @@
-import { getAuthSession } from "@/lib/auth";
-import { notFound } from "next/navigation";
+import {getAuthSession} from "@/lib/auth";
+import {notFound} from "next/navigation";
 import prisma from "@/lib/prisma";
-import { INFINITE_SCROLL_PAGINATION_RESULTS } from "@/lib/config";
-import PostsFeed from "../PostsFeed";
+import {INFINITE_SCROLL_PAGINATION_RESULTS} from "@/lib/config";
+import UserPostsFeed from "../user/UserPostsFeed";
 
 const CustomFeed = async () => {
   const session = await getAuthSession();
@@ -39,7 +39,7 @@ const CustomFeed = async () => {
     take: INFINITE_SCROLL_PAGINATION_RESULTS,
   });
 
-  return <PostsFeed initPosts={posts} />;
+  return <UserPostsFeed initPosts={posts} searchType={"community"} />;
 };
 
 export default CustomFeed;
