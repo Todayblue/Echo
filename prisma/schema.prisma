@@ -178,55 +178,26 @@ enum VoteType {
   DOWN
 }
 
-// model Blog {
-//   id         Int      @id @default(autoincrement())
-//   createdAt  DateTime @default(now())
-//   slug       String?  @unique
-//   title      String
-//   content    String
-//   coverImage String
-//   author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-//   authorId   String
-//   tags       Tag[]
-
-//   @@index([title, slug])
-// }
-
-// model Tag {
-//   id        Int      @id @default(autoincrement())
-//   slug      String?  @unique
-//   blogs     Blog[]
-//   createdAt DateTime @default(now())
-//   name      String   @unique
-//   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-//   authorId  String
-// }
-
 model Blog {
-  id         Int           @id @default(autoincrement())
-  createdAt  DateTime      @default(now())
-  slug       String?       @unique
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  slug       String?  @unique
   title      String
   content    String
   coverImage String
-  author     User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId   String
-  tags       TagsOnBlogs[]
+  tags       Tag[]
+
+  @@index([title, slug])
 }
 
 model Tag {
-  id     Int           @id @default(autoincrement())
-  name   String
-  posts  TagsOnBlogs[]
-  User   User?         @relation(fields: [userId], references: [id])
-  userId String?
-}
-
-model TagsOnBlogs {
-  blog   Blog @relation(fields: [blogId], references: [id])
-  blogId Int // relation scalar field (used in the `@relation` attribute above)
-  tag    Tag  @relation(fields: [tagId], references: [id])
-  tagId  Int // relation scalar field (used in the `@relation` attribute above)
-
-  @@id([blogId, tagId])
+  id        Int      @id @default(autoincrement())
+  slug      String?  @unique
+  blogs     Blog[]
+  createdAt DateTime @default(now())
+  name      String   @unique
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
 }

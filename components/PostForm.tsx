@@ -31,6 +31,7 @@ import {useRouter} from "next/navigation";
 import {MapPin} from "lucide-react";
 import {DropdownOption} from "@/types/common";
 import {GetCommunityDDL, createSubCommuPost} from "@/services/community";
+import { useCustomToasts } from "@/hooks/use-custom-toasts";
 
 type Props = {
   setCommunityId: (vaule: string) => void;
@@ -44,6 +45,7 @@ const PostForm = ({
   setIsDefault,
 }: Props) => {
   const router = useRouter();
+  const {loginToast} = useCustomToasts();
 
   const [media, setMedia] = useState<any>(null);
   const [selected, setSelected] = useState<DropdownOption | null>(
@@ -92,7 +94,7 @@ const PostForm = ({
           });
         }
         if (err.response?.status === 401) {
-          // return loginToast();
+          return loginToast();
         }
       }
 

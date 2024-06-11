@@ -115,7 +115,7 @@ const PostCard = ({
               className="relative text-sm max-h-40 w-full overflow-clip"
               ref={pRef}
             >
-              {cleanContent ? (
+              {!videoUrl && !image && cleanContent ? (
                 <div
                   className="text-gray-700"
                   dangerouslySetInnerHTML={{__html: cleanContent}}

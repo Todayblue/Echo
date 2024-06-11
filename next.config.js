@@ -12,6 +12,7 @@ const nextConfig = {
       "i.pinimg.com",
       "res.cloudinary.com",
       "lh3.googleusercontent.com",
+      "www.gravatar.com"
     ],
     remotePatterns: [
       {

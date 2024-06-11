@@ -124,7 +124,6 @@ export async function PATCH(
       await prisma.notification.create({
         data: {
           message: `${existingCommunity.name} community is active now`,
-          type: "COMMUNITY_APPROVED",
           herf: `/community/${existingCommunity.slug}`,
           userId: existingCommunity.creatorId,
         },

@@ -42,6 +42,7 @@ import {Switch} from "../ui/switch";
 import {Button} from "../ui/button";
 import {usePathname} from "next/navigation";
 import {useSession} from "next-auth/react";
+import {AutosizeTextarea} from "../ui/autosize-textarea";
 
 interface CloudinaryResource {
   context?: {
@@ -260,7 +261,10 @@ const CommunityForm = ({defaultValues}: Props) => {
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Community description" {...field} />
+                  <AutosizeTextarea
+                    placeholder="Community description"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

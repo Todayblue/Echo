@@ -10,9 +10,7 @@ export const CommunityValidator = z.object({
     .string({required_error: "Please fill in community title"})
     .min(3)
     .max(100),
-  description: z
-    .string({required_error: "Please fill in community description"})
-    .max(300),
+  description: z.string(),
   profileImage: z.string({required_error: "Please upload community image"}),
   isActive: z.boolean().default(false),
 });

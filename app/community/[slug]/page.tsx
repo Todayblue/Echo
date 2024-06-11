@@ -16,6 +16,7 @@ const PostsFeed = dynamic(() => import("@/components/PostsFeed"), {
 });
 // import PostsFeed from "@/components/PostsFeed";
 import dynamic from "next/dynamic";
+import {Role} from "@prisma/client";
 
 type communityOption = {
   page?: number;
@@ -131,7 +132,10 @@ const Page = async ({params: {slug}}: {params: {slug: string}}) => {
                   community={community}
                   memberCount={memberCount}
                 />
-                <RuleList community={community} rules={rules} />
+                {session?.user.id === community.id ||
+                  (session?.user.role === Role.ADMIN && (
+                    <RuleList community={community} rules={rules} />
+                  ))}
               </div>
             </div>
           </div>

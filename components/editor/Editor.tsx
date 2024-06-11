@@ -1,6 +1,6 @@
 "use client";
 import "react-quill/dist/quill.snow.css";
-import React, { useState } from "react";
+import React, { HTMLProps, useState } from "react";
 import dynamic from "next/dynamic";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
@@ -10,9 +10,10 @@ type EditorProps = {
   value?: string;
   onChange?: (value: string) => void; // Change the type of onChange
   placeholder?: string;
+  className?: HTMLProps<HTMLElement>["className"];
 };
 
-const Editor = ({ value, onChange, placeholder }: EditorProps) => {
+const Editor = ({ value, onChange, placeholder,className }: EditorProps) => {
   const modules = {
     toolbar: TOOLSBAR,
   };
@@ -24,7 +25,7 @@ const Editor = ({ value, onChange, placeholder }: EditorProps) => {
   };
 
   return (
-    <div className="max-w-4xl">
+    <div className={className}>
       <ReactQuill
         className="prose prose-lg resize-y"
         placeholder={placeholder}

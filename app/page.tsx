@@ -50,60 +50,64 @@ export default async function Home() {
 
   return (
     <ScrollArea className="h-full pt-6 px-44">
-      <ScrollArea className="w-full rounded-md border bg-white mb-6">
-        <div className="border-b bg-secondary px-6 py-3">
-          <p className="tracking-wide text-base font-semibold">Community</p>
-        </div>
-        <div className="grid grid-cols-8 gap-2 place-items-center mx-2 p-2">
-          {communities.map((community) => (
-            <CommuCard
-              key={community.id}
-              name={community.name}
-              communitySlug={community.slug}
-              profileImage={community.profileImage}
-              aspectRatio="square"
-              width={60}
-              height={60}
-            />
-          ))}
-        </div>
-      </ScrollArea>
+      {communities.length > 0 && (
+        <ScrollArea className="w-full rounded-md border bg-white mb-6 h-[284px]">
+          <div className="border-b bg-secondary px-6 py-3">
+            <p className="tracking-wide text-base font-semibold">Community</p>
+          </div>
+          <div className="grid grid-cols-8 gap-2 place-items-center mx-2 p-2">
+            {communities.map((community) => (
+              <CommuCard
+                key={community.id}
+                name={community.name}
+                communitySlug={community.slug}
+                profileImage={community.profileImage}
+                aspectRatio="square"
+                width={60}
+                height={60}
+              />
+            ))}
+          </div>
+        </ScrollArea>
+      )}
 
       <div className="grid grid-cols-6 gap-6">
         <div className="grid col-span-4 gap-y-1">
           {session?.user ? <CustomFeed /> : <GeneralFeed />}
         </div>
         <div className="col-span-2 overflow-hidden">
-          <ScrollArea className="h-[512px]">
-            <Card className="bg-slate-50">
-              <CardHeader>
-                <CardTitle className="text-md font-semibold">
-                  POPULAR COMMUNITIES
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-2 px-8">
-                {popularCommunities.map((community) => (
-                  <Link
-                    href={`community/${community.slug}`}
-                    className="flex items-center "
-                    key={community.id}
-                  >
-                    <img
-                      className="w-10 h-10 rounded-full"
-                      src={community.profileImage || ""}
-                      alt={community.name}
-                    />
-                    <div className="ml-2">
-                      <p className="text-base  ">{community.name}</p>
-                      <p className="text-sm text-gray-600">
-                        {community.subscribers.length} members
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </CardContent>
-            </Card>
-          </ScrollArea>
+          {popularCommunities.length > 0 && (
+            <ScrollArea className="h-[512px]">
+              <Card className="bg-slate-50">
+                <CardHeader>
+                  <CardTitle className="text-md font-semibold">
+                    POPULAR COMMUNITIES
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-2 px-8">
+                  {popularCommunities.map((community) => (
+                    <Link
+                      href={`community/${community.slug}`}
+                      className="flex items-center "
+                      key={community.id}
+                    >
+                      <img
+                        className="w-10 h-10 rounded-full"
+                        src={community.profileImage || ""}
+                        alt={community.name}
+                      />
+                      <div className="ml-2">
+                        <p className="text-base  ">{community.name}</p>
+                        <p className="text-sm text-gray-600">
+                          {community.subscribers.length} members
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </CardContent>
+              </Card>
+            </ScrollArea>
+          )}
         </div>
       </div>
     </ScrollArea>

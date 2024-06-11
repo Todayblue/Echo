@@ -62,7 +62,7 @@ const Page = () => {
             <Card className="flex flex-col p-4 order-first md:order-last">
               <div className="flex items-center gap-x-2">
                 <Image className="h-10 w-10" src={pfp} alt="pfp" />
-                <h1 className="font-medium">Posting to Reddit</h1>
+                <h1 className="font-medium">Posting Rule</h1>
               </div>
               <Separator className="mt-2" />
 

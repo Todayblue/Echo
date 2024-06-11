@@ -1,9 +1,26 @@
 import {getAuthSession} from "@/lib/auth";
 import {calSkip} from "@/lib/calSkip";
 import prisma from "@/lib/prisma";
-import {getTimeRange} from "@/lib/utils";
-import {SearchPostParams, SearchUserPostParams} from "@/types";
-import {Community, Subscription, VoteType} from "@prisma/client";
+import {getSortByAndWhereClause, getTimeRange} from "@/lib/utils";
+import { SearchUserPostParams } from "@/types";
+
+type SearchType = "posts" | "upvote" | "downvote" | "community" | null;
+type TimeRange = "year" | "month" | "week" | "day" | "hour" | null;
+type SortType = "new" | "comments" | "votes" | null | undefined;
+
+const getFollowedCommunities = async (
+  userId: string | undefined,
+  searchType: SearchType
+) => {
+  if (searchType === "community" && userId) {
+    return await prisma.subscription.findMany({
+      where: {userId},
+      include: {community: true},
+    });
+  }
+  return [];
+};
+
 
 export async function GET(req: Request) {
   const session = await getAuthSession();
@@ -51,80 +68,3 @@ export async function GET(req: Request) {
 
   return new Response(JSON.stringify(posts));
 }
-
-type SearchType = "posts" | "upvote" | "downvote" | "community" | null;
-type TimeRange = "year" | "month" | "week" | "day" | "hour" | null;
-type SortType = "new" | "comments" | "votes" | null | undefined;
-
-type FollowedCommunities = Subscription & {
-  community: Community;
-};
-
-const getFollowedCommunities = async (
-  userId: string | undefined,
-  searchType: SearchType
-) => {
-  if (searchType === "community" && userId) {
-    return await prisma.subscription.findMany({
-      where: {userId},
-      include: {community: true},
-    });
-  }
-  return [];
-};
-
-export const getSortByAndWhereClause = (
-  userId: string | null,
-  followedCommunities: FollowedCommunities[] | [],
-  searchType: SearchType,
-  sort: SortType,
-  start: Date,
-  end: Date
-) => {
-  const whereClause: any = {createdAt: {gte: start, lte: end}};
-  let sortBy: any = {};
-
-  if (userId) {
-    switch (searchType) {
-      case "posts":
-        whereClause.authorId = userId;
-        break;
-      case "upvote":
-        whereClause.votes = {some: {userId, type: VoteType.UP}};
-        break;
-      case "downvote":
-        whereClause.votes = {some: {userId, type: VoteType.DOWN}};
-        break;
-      case "community":
-        if (followedCommunities) {
-          whereClause.community = {
-            id: {in: followedCommunities.map((com) => com.communityId)},
-          };
-        }
-        break;
-      default:
-        break;
-    }
-  }
-
-  switch (sort) {
-    case "new":
-      sortBy = {createdAt: "desc"};
-      break;
-    case "comments":
-      sortBy = {comments: {_count: "desc"}};
-      break;
-    case "votes":
-      sortBy = {votes: {_count: "desc"}};
-      whereClause.votes = {
-        every: {
-          type: "UP",
-        },
-      };
-      break;
-    default:
-      break;
-  }
-
-  return {sortBy, whereClause};
-};
