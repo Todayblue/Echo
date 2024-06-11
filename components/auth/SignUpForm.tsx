@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import {useForm} from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -9,17 +9,17 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {Input} from "../ui/input";
+import {Button} from "../ui/button";
 import Link from "next/link";
 import GoogleSignInButton from "../GoogleSignInButton";
-import { CardDescription, CardHeader, CardTitle } from "../ui/card";
-import toast, { Toaster } from "react-hot-toast";
-import axios, { AxiosError } from "axios";
-import { CreateUserPayload, CreateUserValidator } from "@/lib/validators/user";
-import { useMutation } from "@tanstack/react-query";
-import {useRouter} from "next-nprogress-bar"
+import {CardDescription, CardHeader, CardTitle} from "../ui/card";
+import axios, {AxiosError} from "axios";
+import {CreateUserPayload, CreateUserValidator} from "@/lib/validators/user";
+import {useMutation} from "@tanstack/react-query";
+import {useRouter} from "next-nprogress-bar";
+import {toast} from "@/hooks/use-toast";
 
 const SignUpForm = () => {
   const router = useRouter();
@@ -32,26 +32,37 @@ const SignUpForm = () => {
   });
 
   const createUser = async (payload: CreateUserPayload) => {
-    const { data } = await axios.post("/api/user", payload);
+    const {data} = await axios.post("/api/user", payload);
     return data;
   };
 
-  const { mutate: userCreate, isPending } = useMutation({
+  const {mutate: userCreate, isPending} = useMutation({
     mutationFn: async (values: CreateUserPayload) => createUser(values),
     onError: (err) => {
       if (err instanceof AxiosError) {
         if (err.response?.status === 409) {
           if (err.response.data.message.includes("email")) {
-            return toast.error("User with this email already exists");
+            toast({
+              title: "There was an error.",
+              description: `User with this email already exists`,
+            });
           } else if (err.response.data.message.includes("username")) {
-            return toast.error("User with this username already exists");
+            toast({
+              title: "There was an error.",
+              description: `User with this username already exists`,
+            });
           }
         }
       }
-      toast.error("Could not create user");
+      toast({
+        title: "There was an error.",
+        description: `${err}`,
+      });
     },
     onSuccess: (data) => {
-      toast.success("Create user successfully");
+      toast({
+        title: "Success",
+      });
       setTimeout(() => {
         router.push("/user/sign-in");
       }, 1000);
@@ -63,7 +74,6 @@ const SignUpForm = () => {
   };
   return (
     <Form {...form}>
-      <Toaster position="top-right" reverseOrder={false} />
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
         <CardHeader className="text-center  space-y-1 px-1">
           <CardTitle className="text-2xl font-bold">
@@ -77,7 +87,7 @@ const SignUpForm = () => {
           <FormField
             control={form.control}
             name="username"
-            render={({ field }) => (
+            render={({field}) => (
               <FormItem>
                 <FormLabel>Username</FormLabel>
                 <FormControl>
@@ -90,7 +100,7 @@ const SignUpForm = () => {
           <FormField
             control={form.control}
             name="email"
-            render={({ field }) => (
+            render={({field}) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
@@ -103,7 +113,7 @@ const SignUpForm = () => {
           <FormField
             control={form.control}
             name="password"
-            render={({ field }) => (
+            render={({field}) => (
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
@@ -120,7 +130,7 @@ const SignUpForm = () => {
           <FormField
             control={form.control}
             name="confirmPassword"
-            render={({ field }) => (
+            render={({field}) => (
               <FormItem>
                 <FormLabel>Re-Enter your password</FormLabel>
                 <FormControl>

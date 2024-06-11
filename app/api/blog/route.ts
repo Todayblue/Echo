@@ -1,70 +1,64 @@
 import {getAuthSession} from "@/lib/auth";
 import {calSkip} from "@/lib/calSkip";
 import prisma from "@/lib/prisma";
-import { generateSlug } from "@/lib/slugtify";
+import {generateSlug} from "@/lib/slugtify";
 import {BlogValidator} from "@/lib/validators/blog/blog";
 import {NextResponse} from "next/server";
 import {type NextRequest} from "next/server";
 
-async function getBlogs(
-  tagId: string | null,
-  skip: number,
-  parsedLimit: number
+export async function GET(
+  request: Request,
+  {params}: {params: {slug: string}}
 ) {
-  let whereCondition = {};
-
-  if (tagId) {
-    let id = parseInt(tagId);
-    whereCondition = {
-      tags: {
-        some: {
-          id: id,
-        },
-      },
-    };
-  }
-
-  const [blogs, blogCount] = await Promise.all([
-    prisma.blog.findMany({
-      skip: skip,
-      take: parsedLimit,
-      include: {
-        tags: true,
-        author: true,
-      },
-      where: whereCondition,
-    }),
-    prisma.blog.count({
-      where: whereCondition,
-    }),
-  ]);
-
-  return {blogs, blogCount};
-}
-
-export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const page = searchParams.get("page");
-    const limit = searchParams.get("limit");
-    const tagId = searchParams.get("tagId");
+    const url = new URL(request.url);
+    const tag = url.searchParams.get("tag");
+    const page = url.searchParams.get("page");
+    const limit = url.searchParams.get("limit");
 
     if (!page || !limit) {
       throw new Error("Both 'page' and 'limit' parameters are required.");
     }
 
     const parsedPage = parseInt(page, 10);
-    const parsedLimit = parseInt(limit);
+    const parsedLimit = parseInt(limit, 10);
     const skip = calSkip(parsedPage, parsedLimit);
 
-    const {blogs, blogCount} = await getBlogs(tagId, skip, parsedLimit);
+    let whereCondition = {};
+    if (tag !== "all") {
+      whereCondition = {
+        tags: {
+          some: {
+            slug: {
+              contains: tag || "",
+            },
+          },
+        },
+      };
+    }
 
-    return NextResponse.json(
-      {message: "GET Blog successfully", blogCount, blogs},
-      {status: 200}
-    );
+    const blogs = await prisma.blog.findMany({
+      where: whereCondition,
+      include: {
+        author: true,
+        tags: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip: skip,
+      take: parsedLimit,
+    });
+
+    const blogCount = await prisma.blog.count({
+      where: whereCondition,
+    });
+
+    const data = {blogs, blogCount};
+
+    return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json({message: "Can't GET Blog", error}, {status: 500});
+    return NextResponse.json({message: "Fail", error}, {status: 500});
   }
 }
 

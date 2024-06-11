@@ -15,7 +15,7 @@ import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {Notification, User} from "@prisma/client";
 import {useMutation, useQuery} from "@tanstack/react-query";
 import axios from "axios";
-import {Mail, MailWarning} from "lucide-react";
+import {Bell, Mail, MailWarning} from "lucide-react";
 import {signOut} from "next-auth/react";
 import Link from "next/link";
 
@@ -58,10 +58,10 @@ export function UserNav({user}: UserProps) {
             <PopoverTrigger>
               <div className="pt-2 px-2">
                 <strong className="relative inline-flex items-center ">
-                  <span className="absolute -top-2 -right-2 h-4 w-4 rounded-full bg-sky-200 flex justify-center items-center">
+                  <span className="absolute -top-2 -right-2 h-3 w-3 rounded-full bg-gray-200 flex justify-center items-center">
                     <span>{unreadNotifications?.length}</span>
                   </span>
-                  <Mail className="w-6 h-6" />
+                  <Bell className="w-5 h-5" />
                 </strong>
               </div>
             </PopoverTrigger>

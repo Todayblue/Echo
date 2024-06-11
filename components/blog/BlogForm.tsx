@@ -31,8 +31,7 @@ import {useMutation} from "@tanstack/react-query";
 import axios from "axios";
 import {TagPayload} from "@/lib/validators/blog/tag";
 import {BlogPayload, BlogValidator} from "@/lib/validators/blog/blog";
-import {generateSlug} from "@/lib/slugtify";
-import {Blog, Tag} from "@prisma/client";
+import { Blog, Tag } from "@prisma/client";
 
 interface CloudinaryResource {
   context?: {
@@ -47,7 +46,7 @@ type Props = {
   tags: Tag[];
   defaultValues?: Blog & {
     tags: Tag[];
-  };
+  }
 };
 
 type Option = {
@@ -338,6 +337,7 @@ const BlogForm = ({tags, defaultValues}: Props) => {
                   {...field}
                   value={field.value}
                   onChange={field.onChange}
+                  className="w-full"
                 />
               </FormControl>
               <FormMessage />

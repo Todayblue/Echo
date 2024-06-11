@@ -20,7 +20,7 @@ type Props = {
 
 const BlogTags = ({tags, currentSlug}: Props) => {
   return (
-    <Carousel className="max-w-3xl">
+    <Carousel className="w-full">
       <CarouselContent className="-ml-4">
         {tags.map((tag) => (
           <CarouselItem

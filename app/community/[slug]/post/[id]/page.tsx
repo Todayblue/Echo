@@ -60,7 +60,7 @@ const Page = async ({params: {id}}: {params: {id: string}}) => {
 
   return (
     <ScrollArea className="h-full pt-6 px-52">
-      <div className="grid place-content-center lg:grid-cols-6 gap-6 md:grid-cols-1 ">
+      <div className="grid place-content-center lg:grid-cols-6 gap-6 md:grid-cols-1 pb-4">
         <div className="col-span-4 space-y-4">
           <Card className="flex flex-row space-x-3 p-2 ">
             <div className=" w-full">

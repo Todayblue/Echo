@@ -73,8 +73,7 @@ export function ProfileForm({user}: ProfileProps) {
     mutationFn: async (values: UpdateUserPayload) => updateUser(values),
     onSuccess: (data) => {
       toast({
-        title: "Created Community Successfully",
-        variant: "success",
+        title: "Success",
         duration: 2000,
       });
       setTimeout(() => {
