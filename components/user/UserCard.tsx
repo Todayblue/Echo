@@ -1,31 +1,17 @@
 "use client";
-import React, {useRef, useState} from "react";
+import React, {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {format} from "date-fns";
 import {enUS} from "date-fns/locale";
 import {Cake, ImageUp} from "lucide-react";
 import Link from "next/link";
 import {Community, User} from "@prisma/client";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {Input} from "../ui/input";
 import ImageUpload from "../ImageUpload";
 import axios from "axios";
 import {UpdateUserPayload} from "@/lib/validators/user";
 import {useMutation} from "@tanstack/react-query";
 import {toast} from "@/hooks/use-toast";
+import {useRouter} from "next-nprogress-bar";
 
 type Props = {
   user: User;
@@ -46,6 +32,7 @@ const UserCard = ({user, userCommunity}: Props) => {
   const [file, setFile] = useState<File | undefined>();
   const [sneakers, setSneakers] = useState<Array<CloudinaryResource>>();
   const [showSubmitButton, setShowSubmitButton] = useState(false); // Initially show the submit button
+  const router = useRouter();
 
   const handleSubmit = async (model: UpdateUserPayload) => {
     const imageUrl = await handleImageSubmit();
@@ -62,10 +49,12 @@ const UserCard = ({user, userCommunity}: Props) => {
     mutationFn: async (values: UpdateUserPayload) => handleSubmit(values),
     onSuccess: (data) => {
       toast({
-        title: "",
-        variant: "success",
+        title: "Success",
         duration: 2000,
       });
+      setTimeout(() => {
+        router.refresh();
+      }, 1000);
     },
   });
 
@@ -143,20 +132,24 @@ const UserCard = ({user, userCommunity}: Props) => {
           </h2>
         </div>
         <p className="text-gray-700 mx-4 pt-2">{user?.bio}</p>
-        <ul className="flex flex-row mx-4 py-4">
-          <li className="flex flex-col ">
-            <p className="text-gray-800 font-bold">Cake Day</p>
-            <div className="flex space-x-1 justify-center items-center py-1">
-              <Cake className="text-primary" />
-              <p className="text-gray-700 font-medium">
-                {user?.dateOfBirth &&
-                  format(new Date(user.dateOfBirth), "MMM d, yyyy", {
-                    locale: enUS,
-                  })}
-              </p>
-            </div>
-          </li>
-        </ul>
+        {user.dateOfBirth && (
+          <>
+            <ul className="flex flex-row mx-4 py-4">
+              <li className="flex flex-col ">
+                <p className="text-gray-800 font-bold">Cake Day</p>
+                <div className="flex space-x-1 justify-center items-center py-1">
+                  <Cake className="text-primary" />
+                  <p className="text-gray-700 font-medium">
+                    {user?.dateOfBirth &&
+                      format(new Date(user.dateOfBirth), "MMM d, yyyy", {
+                        locale: enUS,
+                      })}
+                  </p>
+                </div>
+              </li>
+            </ul>
+          </>
+        )}
         <div className="p-4 border-t mx-8 mt-2 ">
           <Link href={`/user/${user.username}/settings`}>
             <Button variant={"outline"} className="w-full">

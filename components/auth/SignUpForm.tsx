@@ -86,6 +86,19 @@ const SignUpForm = () => {
         <div className="space-y-2">
           <FormField
             control={form.control}
+            name="name"
+            render={({field}) => (
+              <FormItem>
+                <FormLabel>DisplayName</FormLabel>
+                <FormControl>
+                  <Input placeholder="johndoe" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="username"
             render={({field}) => (
               <FormItem>
