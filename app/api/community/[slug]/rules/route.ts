@@ -29,11 +29,11 @@ export async function POST(request: Request) {
       },
     });
 
-    if (session?.user.id !== community?.creatorId) {
-      return new Response("Only created this community can create rules!!", {
-        status: 401,
-      });
-    }
+    // if (session?.user.id !== community?.creatorId) {
+    //   return new Response("Only created this community can create rules!!", {
+    //     status: 401,
+    //   });
+    // }
 
     const rule = await prisma.rule.create({
       data: {
