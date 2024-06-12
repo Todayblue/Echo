@@ -132,9 +132,10 @@ const Page = async ({params: {slug}}: {params: {slug: string}}) => {
                   community={community}
                   memberCount={memberCount}
                 />
-                {community.rule.length > 0 && (
+                {community?.creatorId === session?.user?.id ||
+                session?.user.role === Role.ADMIN ? (
                   <RuleList community={community} rules={rules} />
-                )}
+                ) : null}
               </div>
             </div>
           </div>

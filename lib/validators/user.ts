@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const CreateUserValidator = z
   .object({
+    name: z.string().min(1, "Please fill in name"),
     email: z.string().min(1, "Please fill in email").email("Invalid email"),
     username: z
       .string()

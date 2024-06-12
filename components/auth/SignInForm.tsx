@@ -52,6 +52,7 @@ const SignInForm = () => {
     } else {
       setLoading(false);
       router.push("/");
+      router.refresh();
     }
   };
 

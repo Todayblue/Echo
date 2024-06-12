@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   try {
 
     const body = await request.json();
-    const { email, username, password } = CreateUserValidator.parse(body);
+    const { email, username, password,name } = CreateUserValidator.parse(body);
 
 
     const existingUserByEmail = await prisma.user.findUnique({
@@ -52,6 +52,7 @@ export async function POST(request: Request) {
 
     const newUser = await prisma.user.create({
       data: {
+        name,
         username,
         email,
         password: hashedPassword,

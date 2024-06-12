@@ -4,7 +4,7 @@ import AboutCommunity from "@/components/community/comment/AboutCommunity";
 import RuleList from "@/components/community/rule/RuleList";
 import {useQuery} from "@tanstack/react-query";
 import {useState} from "react";
-import {GetCommunityDetailsById} from "@/services/community";
+import {GetCommunityDDL, GetCommunityDetailsById} from "@/services/community";
 import {Card} from "@/components/ui/card";
 import {Separator} from "@/components/ui/separator";
 import Image from "next/image";
@@ -42,11 +42,16 @@ const Page = () => {
     queryFn: () => GetCommunityDetailsById(communityId),
   });
 
+  const {isPending: ddlPending, data: communityDDL} = useQuery({
+    queryKey: ["communityDDL"],
+    queryFn: () => GetCommunityDDL(),
+  });
+
   return (
     <div className="max-w-[1000px] mx-auto flex gap-x-10 mt-10">
       <div className="w-[65%] flex flex-col gap-y-5">
         <h1 className="font-semibold text-lg border-b pb-3">Create a post</h1>
-        <PostForm setIsDefault={setIsDefault} setCommunityId={setCommunityId} />
+        <PostForm setIsDefault={setIsDefault} setCommunityId={setCommunityId} communityDDL={communityDDL} />
       </div>
       <div className="w-[35%]">
         <div className="flex flex-col space-y-6">

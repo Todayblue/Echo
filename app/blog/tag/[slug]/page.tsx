@@ -8,6 +8,7 @@ import {useQuery, keepPreviousData} from "@tanstack/react-query";
 import axios from "axios";
 import {Blog, Tag, User} from "@prisma/client";
 import {BLOG_ITEM_PER_PAGE} from "@/lib/constants";
+import ClipLoader from "react-spinners/ClipLoader";
 
 type TagDto = Pick<Tag, "name" | "slug">;
 type BlogDto = {
@@ -55,8 +56,12 @@ const Page = ({params: {slug}}: {params: {slug: string}}) => {
 
   const allTags = [{slug: "all", name: "all"}, ...(tags || [])];
 
-  if (isPending) {
-    return <div>Loading...</div>;
+  if (isPending || isFetching) {
+    return (
+      <div className="grid items-center place-content-center h-full">
+        <ClipLoader color="#000000" />
+      </div>
+    );
   }
 
   return (
@@ -71,7 +76,7 @@ const Page = ({params: {slug}}: {params: {slug: string}}) => {
           <BlogTags tags={allTags} currentSlug={slug} />
         </div>
 
-        <div className="grid  grid-cols-1 sm:grid-cols-2  lg:grid-cols-3 grid-rows-2 gap-16  my-8 px-5 ">
+        <div className="grid grid-cols-1 sm:grid-cols-2  lg:grid-cols-4 grid-rows-2 gap-16  my-8 px-5 ">
           {data?.blogs.map((blog) => (
             <article key={blog.id} className="col-span-1 row-span-1 relative">
               <BlogLayout blog={blog} />

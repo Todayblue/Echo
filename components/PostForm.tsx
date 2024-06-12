@@ -24,24 +24,26 @@ import Select from "react-select";
 import {toast} from "@/hooks/use-toast";
 
 // api
-import {useMutation, useQuery} from "@tanstack/react-query";
-import axios, {AxiosError} from "axios";
+import {useMutation} from "@tanstack/react-query";
+import {AxiosError} from "axios";
 import {useRouter} from "next/navigation";
 
 import {MapPin} from "lucide-react";
 import {DropdownOption} from "@/types/common";
-import {GetCommunityDDL, createSubCommuPost} from "@/services/community";
-import { useCustomToasts } from "@/hooks/use-custom-toasts";
+import {createSubCommuPost} from "@/services/community";
+import {useCustomToasts} from "@/hooks/use-custom-toasts";
 
 type Props = {
   setCommunityId: (vaule: string) => void;
   setIsDefault?: (vaule: boolean) => void;
   defaultCommunityDDL?: DropdownOption;
+  communityDDL?: DropdownOption[];
 };
 
 const PostForm = ({
   setCommunityId,
   defaultCommunityDDL,
+  communityDDL,
   setIsDefault,
 }: Props) => {
   const router = useRouter();
@@ -58,11 +60,6 @@ const PostForm = ({
     defaultValues: {
       communityId: defaultCommunityDDL?.value,
     },
-  });
-
-  const {isPending: ddlPending, data: communityDDL} = useQuery({
-    queryKey: ["communityDDL"],
-    queryFn: () => GetCommunityDDL(),
   });
 
   const handleSelectChange = (selectOptions: any) => {

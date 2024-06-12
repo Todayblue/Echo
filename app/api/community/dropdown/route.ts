@@ -1,12 +1,24 @@
+import {getAuthSession} from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import {DropdownOption} from "@/types/common";
 import {NextResponse} from "next/server";
 
 export async function GET() {
+  const session = await getAuthSession();
+
+  if (!session?.user) {
+    return new Response("Unauthorized", {status: 401});
+  }
+
   try {
     const communities = await prisma.community.findMany({
       where: {
         isActive: true,
+        subscribers: {
+          some: {
+            userId: session?.user.id,
+          },
+        },
       },
       select: {
         id: true,
